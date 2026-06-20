@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #eceae4; }
+  button { font: inherit; }
+  @page { size: A4; margin: 16mm 14mm; }
+  @media print {
+    body { background: #fff; }
+    .sheet { box-shadow: none !important; margin: 0 !important; width: auto !important; }
+    .noprint { display: none !important; }
+    .pb { page-break-before: always; }
+    tr, .req, .tbl { break-inside: avoid; }
+  }
+</style>
+</helmet>
+
+<div style="font-family:'Hanken Grotesk',system-ui,sans-serif;color:#1c2433;-webkit-font-smoothing:antialiased;padding:26px 0 60px">
+
+  <div class="noprint" style="max-width:820px;margin:0 auto 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 16px">
+    <div style="font-size:13px;color:#6b7280">Use your browser's Print → <b>Save as PDF</b> (A4).</div>
+    <button onClick="{{ onPrint }}" style="display:inline-flex;align-items:center;gap:8px;background:#16243f;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13.5px;font-weight:600;cursor:pointer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      Save as PDF
+    </button>
+  </div>
+
+  <div class="sheet" style="max-width:820px;margin:0 auto;background:#fff;box-shadow:0 6px 30px -10px rgba(20,30,50,0.25);padding:54px 56px 60px;border-radius:3px">
+
+    <!-- COVER -->
+    <div style="border-bottom:3px solid #16243f;padding-bottom:22px;margin-bottom:30px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div style="width:40px;height:40px;border-radius:10px;background:#16243f;display:flex;align-items:center;justify-content:center"><span style="font-family:'Source Serif 4',serif;font-weight:700;font-size:16px;color:#c7a25f">LD</span></div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:#8a6d3f">LAWYERS DIARY — ADVOCATE'S CAUSE DIARY</div>
+      </div>
+      <h1 style="margin:0;font-family:'Source Serif 4',serif;font-weight:700;font-size:34px;line-height:1.12">Functional Requirements &amp; Database Schema</h1>
+      <div style="font-size:14px;color:#6b7280;margin-top:10px">Specification v1.1 · Updated Jun 2026 · Bangladesh advocate practice-management app · Functional spec, schema &amp; UML (Use Case · ERD · Class · Sequence) for backend build &amp; review.</div>
+      <div style="display:flex;gap:26px;margin-top:18px;font-size:12.5px;color:#6b7280">
+        <span><b style="color:#1c2433">Scope</b> · Single-advocate diary, multi-tenant</span>
+        <span><b style="color:#1c2433">Recommended stack</b> · Supabase (Postgres + Auth + Storage)</span>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;font-size:11.5px">
+      <span style="background:#fbe9e4;color:#b23a22;font-weight:700;padding:3px 9px;border-radius:6px">MUST — MVP</span>
+      <span style="background:#fbf2dc;color:#9a7416;font-weight:700;padding:3px 9px;border-radius:6px">SHOULD — v1.1</span>
+      <span style="background:#eef1f6;color:#42536f;font-weight:700;padding:3px 9px;border-radius:6px">COULD — later</span>
+    </div>
+
+    <h2 style="font-family:'Source Serif 4',serif;font-size:20px;margin:0 0 4px;color:#16243f">1 · Functional Requirements</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:18px"></div>
+    <sc-for list="{{ modules }}" as="m" hint-placeholder-count="13">
+      <div class="tbl" style="margin-bottom:22px">
+        <div style="font-size:13.5px;font-weight:700;color:#16243f;letter-spacing:0.3px;margin-bottom:9px">{{ m.title }}</div>
+        <sc-for list="{{ m.items }}" as="r" hint-placeholder-count="5">
+          <div class="req" style="display:flex;gap:12px;padding:7px 0;border-top:1px solid #f1eee8;align-items:flex-start">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:#8a6d3f;flex:0 0 46px;padding-top:1px">{{ r.id }}</span>
+            <span style="flex:1;font-size:13px;line-height:1.5;color:#283246">{{ r.text }}</span>
+            <span style="{{ r.tagStyle }}">{{ r.tag }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+
+    <h2 class="pb" style="font-family:'Source Serif 4',serif;font-size:20px;margin:8px 0 4px;color:#16243f">2 · Database Schema</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:14px"></div>
+    <p style="font-size:12.5px;color:#5b6678;line-height:1.6;margin:0 0 20px">PostgreSQL. Every tenant-owned row carries <b>advocate_id</b>; Row-Level Security restricts each advocate to their own rows (true per-user isolation). Primary keys are <span style="font-family:'IBM Plex Mono',monospace">uuid</span>; timestamps are <span style="font-family:'IBM Plex Mono',monospace">timestamptz</span> with <span style="font-family:'IBM Plex Mono',monospace">created_at / updated_at</span>.</p>
+
+    <sc-for list="{{ tables }}" as="t" hint-placeholder-count="9">
+      <div class="tbl" style="margin-bottom:20px;border:1px solid #e6e2da;border-radius:9px;overflow:hidden">
+        <div style="background:#16243f;color:#fff;padding:9px 14px;display:flex;align-items:baseline;gap:10px">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#c7a25f">{{ t.name }}</span>
+          <span style="font-size:11.5px;color:#9fb0cf">{{ t.note }}</span>
+        </div>
+        <table style="width:100%;border-collapse:collapse">
+          <sc-for list="{{ t.cols }}" as="c" hint-placeholder-count="6">
+            <tr>
+              <td style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:#1c2433;padding:6px 14px;border-top:1px solid #f1eee8;width:38%;vertical-align:top">{{ c.name }}</td>
+              <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#8a6d3f;padding:6px 8px;border-top:1px solid #f1eee8;width:26%;vertical-align:top">{{ c.type }}</td>
+              <td style="font-size:11.5px;color:#5b6678;padding:6px 14px 6px 8px;border-top:1px solid #f1eee8;line-height:1.4">{{ c.note }}</td>
+            </tr>
+          </sc-for>
+        </table>
+      </div>
+    </sc-for>
+
+    <h2 class="pb" style="font-family:'Source Serif 4',serif;font-size:20px;margin:8px 0 4px;color:#16243f">3 · Relationships &amp; Rules</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:16px"></div>
+    <sc-for list="{{ rules }}" as="x" hint-placeholder-count="6">
+      <div style="display:flex;gap:10px;padding:8px 0;border-top:1px solid #f1eee8;align-items:flex-start">
+        <span style="color:#8a6d3f;flex:0 0 auto;padding-top:2px">▸</span>
+        <span style="font-size:13px;line-height:1.55;color:#283246">{{ x }}</span>
+      </div>
+    </sc-for>
+
+    <!-- ===================== 4 · USE CASE ===================== -->
+    <h2 class="pb" style="font-family:'Source Serif 4',serif;font-size:20px;margin:8px 0 4px;color:#16243f">4 · Use Case Diagram</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:14px"></div>
+    <p style="font-size:12.5px;color:#5b6678;line-height:1.6;margin:0 0 16px">UML 2.5.1 notation — <b>actors</b> (stick figures) sit outside the <b>system boundary</b>; each <b>use case</b> is an ellipse; a plain line is an <b>association</b>; a dashed arrow labelled <span style="font-family:'IBM Plex Mono',monospace">«include»</span> is a mandatory sub-behaviour. The <b>Advocate</b> is the primary actor and is associated with every use case in the box; <b>Scheduler</b> (time) and <b>Notifier</b> are secondary, system-side actors.</p>
+
+    <div class="tbl" style="border:1px solid #e6e2da;border-radius:10px;padding:18px;background:#fbfaf8;margin-bottom:6px">
+      <div style="display:flex;align-items:stretch;gap:0">
+        <!-- primary actor -->
+        <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;width:74px">
+          <div style="width:19px;height:19px;border-radius:50%;border:2.2px solid #16243f"></div>
+          <div style="width:30px;height:15px;border:2.2px solid #16243f;border-bottom:none;border-radius:15px 15px 0 0;margin-top:2px"></div>
+          <div style="font-size:11px;font-weight:700;color:#16243f;text-align:center;margin-top:5px;line-height:1.15">Advocate</div>
+          <div style="font-size:8.5px;font-weight:600;color:#8a93a3">«primary»</div>
+        </div>
+        <div style="flex:0 0 22px;align-self:center;height:2px;background:#b9c4d6"></div>
+        <!-- system boundary -->
+        <div style="flex:1;min-width:0;border:1.5px solid #b9c4d6;border-radius:12px;padding:30px 14px 14px;position:relative;background:#fff">
+          <div style="position:absolute;top:8px;left:14px;font-size:11px;font-weight:700;color:#8a6d3f;letter-spacing:0.3px;white-space:nowrap">«system» Lawyers Diary App</div>
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <div>
+              <div style="font-size:8.5px;font-weight:700;letter-spacing:0.5px;color:#9aa2b1;margin-bottom:6px">ACCOUNT</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px"><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Register</span><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Log in (OTP)</span><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Edit profile</span></div>
+            </div>
+            <div>
+              <div style="font-size:8.5px;font-weight:700;letter-spacing:0.5px;color:#9aa2b1;margin-bottom:6px">CASES &amp; PARTIES</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px"><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Create / edit case</span><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Manage parties &amp; contacts</span><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Open case file</span></div>
+            </div>
+            <div>
+              <div style="font-size:8.5px;font-weight:700;letter-spacing:0.5px;color:#9aa2b1;margin-bottom:6px">SCHEDULING &amp; CALENDAR</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+                <span style="border:1.4px solid #8a6d3f;background:#f6efe3;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#5b4a2a;font-weight:600">Forward to next date</span>
+                <span style="display:inline-flex;flex-direction:column;align-items:center;color:#8a6d3f"><span style="font-size:7.5px;font-weight:700;letter-spacing:0.3px">«include»</span><span style="width:30px;height:0;border-top:1.4px dashed #8a6d3f;position:relative"><span style="position:absolute;right:-1px;top:-3px;border-top:3px solid transparent;border-bottom:3px solid transparent;border-left:6px solid #8a6d3f"></span></span></span>
+                <span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Append hearing record</span>
+                <span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Browse calendar / cause list</span>
+                <span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">View Bengali date</span>
+                <span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Generate day summary</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:8.5px;font-weight:700;letter-spacing:0.5px;color:#9aa2b1;margin-bottom:6px">MONEY · FILES · CLIENT</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px"><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Record fee</span><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Upload document</span><span style="border:1px solid #c9d2e0;background:#fbfaf8;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#283246;font-weight:500">Send client update (WhatsApp)</span></div>
+            </div>
+            <div style="border-top:1px dashed #e0d3b0;padding-top:11px">
+              <div style="font-size:8.5px;font-weight:700;letter-spacing:0.5px;color:#8a6d3f;margin-bottom:6px">SYSTEM-TRIGGERED</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+                <span style="border:1.4px solid #8a6d3f;background:#f6efe3;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#5b4a2a;font-weight:600">Scan for missing dates</span>
+                <span style="display:inline-flex;flex-direction:column;align-items:center;color:#8a6d3f"><span style="font-size:7.5px;font-weight:700;letter-spacing:0.3px">«include»</span><span style="width:30px;height:0;border-top:1.4px dashed #8a6d3f;position:relative"><span style="position:absolute;right:-1px;top:-3px;border-top:3px solid transparent;border-bottom:3px solid transparent;border-left:6px solid #8a6d3f"></span></span></span>
+                <span style="border:1.4px solid #8a6d3f;background:#f6efe3;border-radius:999px;padding:6px 13px;font-size:10.5px;color:#5b4a2a;font-weight:600">Send reminder</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- secondary actors -->
+        <div style="flex:0 0 auto;display:flex;flex-direction:column;justify-content:center;gap:22px">
+          <div style="display:flex;align-items:center"><div style="flex:0 0 20px;height:2px;background:#b9c4d6"></div><div style="display:flex;flex-direction:column;align-items:center;width:64px"><div style="width:17px;height:17px;border-radius:50%;border:2.2px solid #8a6d3f"></div><div style="width:28px;height:14px;border:2.2px solid #8a6d3f;border-bottom:none;border-radius:14px 14px 0 0;margin-top:2px"></div><div style="font-size:10px;font-weight:700;color:#8a6d3f;text-align:center;margin-top:5px;line-height:1.15">Scheduler</div><div style="font-size:8px;font-weight:600;color:#b09a6a">«time»</div></div></div>
+          <div style="display:flex;align-items:center"><div style="flex:0 0 20px;height:2px;background:#b9c4d6"></div><div style="display:flex;flex-direction:column;align-items:center;width:64px"><div style="width:17px;height:17px;border-radius:50%;border:2.2px solid #8a6d3f"></div><div style="width:28px;height:14px;border:2.2px solid #8a6d3f;border-bottom:none;border-radius:14px 14px 0 0;margin-top:2px"></div><div style="font-size:10px;font-weight:700;color:#8a6d3f;text-align:center;margin-top:5px;line-height:1.15">Notifier</div><div style="font-size:8px;font-weight:600;color:#b09a6a">«device»</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#8a93a3;line-height:1.5;margin-bottom:6px">Gold-outlined use cases carry an <span style="font-family:'IBM Plex Mono',monospace">«include»</span>. <b>Scan for missing dates</b> is triggered by the <b>Scheduler</b> and includes <b>Send reminder</b>, performed via the <b>Notifier</b> (push / SMS / in-app) — this is the automated half of FR-G2 (the advocate also sees the same matters flagged in-app).</div>
+
+    <!-- ===================== 5 · ERD ===================== -->
+    <h2 class="pb" style="font-family:'Source Serif 4',serif;font-size:20px;margin:8px 0 4px;color:#16243f">5 · Entity-Relationship Diagram (ERD)</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:14px"></div>
+    <p style="font-size:12.5px;color:#5b6678;line-height:1.6;margin:0 0 16px">Crow's-foot reading: one <b>advocate</b> owns many of every row beneath it (multi-tenant via <span style="font-family:'IBM Plex Mono',monospace">advocate_id</span> + RLS). <b>cases</b> is the hub; its children cascade on delete. Legend — <b style="color:#8a6d3f">PK</b> primary key · <b>FK</b> reference · <span style="font-family:'IBM Plex Mono',monospace;font-weight:700">1—∞</span> one-to-many.</p>
+
+    <div class="tbl" style="border:1px solid #e6e2da;border-radius:10px;padding:18px 18px 20px;background:#fbfaf8;margin-bottom:10px">
+      <!-- root -->
+      <div style="display:inline-flex;align-items:stretch;border:1px solid #b9c4d6;border-radius:7px;overflow:hidden;background:#fff">
+        <div style="background:#16243f;color:#c7a25f;font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;padding:6px 11px;display:flex;align-items:center">advocates</div>
+        <div style="padding:6px 11px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5b6678;display:flex;align-items:center">PK id · email* · phone · theme · default_lang</div>
+      </div>
+      <!-- tier-2 rail -->
+      <div style="margin-left:15px;padding-left:15px;border-left:2px solid #e0d3b0;display:flex;flex-direction:column;gap:11px;padding-top:11px">
+        <!-- clients -->
+        <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#e0d3b0"></div>
+          <div style="display:inline-flex;align-items:stretch;border:1px solid #c9d2e0;border-radius:7px;overflow:hidden;background:#fff"><div style="background:#23324f;color:#c7a25f;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:5px 10px;display:flex;align-items:center">clients</div><div style="padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5b6678;display:flex;align-items:center">PK id · FK advocate_id · name · phone</div></div>
+          <span style="margin-left:8px;font-size:9px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span>
+        </div>
+        <!-- cases + its children -->
+        <div style="position:relative"><div style="position:absolute;left:-15px;top:15px;width:13px;height:2px;background:#e0d3b0"></div>
+          <div style="display:flex;align-items:center">
+            <div style="display:inline-flex;align-items:stretch;border:1.5px solid #8a6d3f;border-radius:7px;overflow:hidden;background:#fff"><div style="background:#16243f;color:#c7a25f;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;padding:5px 10px;display:flex;align-items:center">cases</div><div style="padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5b6678;display:flex;align-items:center">PK id · FK advocate_id, client_id · case_no · prev/next_date · comm_/care_*</div></div>
+            <span style="margin-left:8px;font-size:9px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span>
+          </div>
+          <div style="margin-left:15px;padding-left:15px;border-left:2px solid #cbd6e8;display:flex;flex-direction:column;gap:8px;padding-top:9px;margin-top:9px">
+            <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#cbd6e8"></div><div style="display:inline-flex;align-items:stretch;border:1px solid #d6ddea;border-radius:6px;overflow:hidden;background:#fff"><div style="background:#3a4a6a;color:#dfe7f5;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:4px 9px">case_parties</div><div style="padding:4px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5b6678">side · position · name · is_mine · FK client_id</div></div><span style="margin-left:8px;font-size:8.5px;font-weight:700;color:#42536f;background:#eef1f6;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span></div>
+            <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#cbd6e8"></div><div style="display:inline-flex;align-items:stretch;border:1px solid #d6ddea;border-radius:6px;overflow:hidden;background:#fff"><div style="background:#3a4a6a;color:#dfe7f5;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:4px 9px">opposing_counsel</div><div style="padding:4px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5b6678">name · phone · represents int[]</div></div><span style="margin-left:8px;font-size:8.5px;font-weight:700;color:#42536f;background:#eef1f6;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span></div>
+            <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#cbd6e8"></div><div style="display:inline-flex;align-items:stretch;border:1px solid #d6ddea;border-radius:6px;overflow:hidden;background:#fff"><div style="background:#3a4a6a;color:#dfe7f5;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:4px 9px">hearings</div><div style="padding:4px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5b6678">date · kind · note · forwarded_to</div></div><span style="margin-left:8px;font-size:8.5px;font-weight:700;color:#42536f;background:#eef1f6;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span></div>
+            <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#cbd6e8"></div><div style="display:inline-flex;align-items:stretch;border:1px solid #d6ddea;border-radius:6px;overflow:hidden;background:#fff"><div style="background:#3a4a6a;color:#dfe7f5;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:4px 9px">payments</div><div style="padding:4px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5b6678">type · label · amount · paid_on</div></div><span style="margin-left:8px;font-size:8.5px;font-weight:700;color:#42536f;background:#eef1f6;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span></div>
+            <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#cbd6e8"></div><div style="display:inline-flex;align-items:stretch;border:1px solid #d6ddea;border-radius:6px;overflow:hidden;background:#fff"><div style="background:#3a4a6a;color:#dfe7f5;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:4px 9px">documents</div><div style="padding:4px 9px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:#5b6678">file_name · storage_path · mime · size</div></div><span style="margin-left:8px;font-size:8.5px;font-weight:700;color:#42536f;background:#eef1f6;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span></div>
+          </div>
+        </div>
+        <!-- reminders -->
+        <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#e0d3b0"></div>
+          <div style="display:inline-flex;align-items:stretch;border:1px solid #c9d2e0;border-radius:7px;overflow:hidden;background:#fff"><div style="background:#23324f;color:#c7a25f;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:5px 10px;display:flex;align-items:center">reminders</div><div style="padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5b6678;display:flex;align-items:center">PK id · FK advocate_id · on_date · text · done</div></div>
+          <span style="margin-left:8px;font-size:9px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span>
+        </div>
+        <!-- notifications_log -->
+        <div style="position:relative;display:flex;align-items:center"><div style="position:absolute;left:-15px;top:50%;width:13px;height:2px;background:#e0d3b0"></div>
+          <div style="display:inline-flex;align-items:stretch;border:1px solid #c9d2e0;border-radius:7px;overflow:hidden;background:#fff"><div style="background:#23324f;color:#c7a25f;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:5px 10px;display:flex;align-items:center">notifications_log</div><div style="padding:5px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#5b6678;display:flex;align-items:center">FK advocate_id, case_id · channel · kind · sent_at</div></div>
+          <span style="margin-left:8px;font-size:9px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:2px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace">1—∞</span>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#8a93a3;line-height:1.5;margin-bottom:6px">Also: <b style="color:#283246">clients</b> 1—∞ <b style="color:#283246">cases</b> (a client may be the primary client on many matters, via <span style="font-family:'IBM Plex Mono',monospace">cases.client_id</span>) · <b style="color:#283246">case_parties.client_id</b> optionally links a party row back to a reusable client.</div>
+
+    <!-- ===================== 5 · CLASS DIAGRAM ===================== -->
+    <h2 class="pb" style="font-family:'Source Serif 4',serif;font-size:20px;margin:8px 0 4px;color:#16243f">6 · Class Diagram (domain &amp; services)</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:14px"></div>
+    <p style="font-size:12.5px;color:#5b6678;line-height:1.6;margin:0 0 16px">UML classes — <span style="font-family:'IBM Plex Mono',monospace">name / attributes / operations</span>. Visibility <span style="font-family:'IBM Plex Mono',monospace">+ public  − private</span>. Domain entities mirror the schema; the three service classes hold the business rules (forwarding, missing-date detection, Bengali-date conversion, notification dispatch).</p>
+
+    <div class="tbl" style="display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:14px">
+      <!-- Advocate -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#16243f;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Advocate</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− id, fullName<br>− email, phone<br>− theme, defaultLang</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ register()<br>+ login(otp)</div>
+      </div>
+      <!-- Client -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#16243f;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Client</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− id, name, role<br>− phone, address</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ matters(): Case[]</div>
+      </div>
+      <!-- Case -->
+      <div style="border:1.5px solid #8a6d3f;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#16243f;color:#c7a25f;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Case</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.6">− caseNo, type, court<br>− prevDate, nextDate<br>− commName/Phone<br>− careName/Phone</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.6">+ needsNextDate(): bool<br>+ triggerDate(): Date<br>+ forwardTo(date)</div>
+      </div>
+      <!-- Party -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#3a4a6a;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Party</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− side, position<br>− name, isMine<br>− phone</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ tag(): string</div>
+      </div>
+      <!-- OpposingCounsel -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#3a4a6a;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">OpposingCounsel</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− name, phone<br>− represents: int[]</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ appearsFor()</div>
+      </div>
+      <!-- Hearing -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#3a4a6a;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Hearing</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− date, kind<br>− title, note<br>− forwardedTo</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ isOpen(): bool</div>
+      </div>
+      <!-- Payment -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#3a4a6a;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Payment</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− type, label<br>− amount, paidOn</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ isHonorarium()</div>
+      </div>
+      <!-- Document -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#3a4a6a;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Document</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− fileName, mime<br>− storagePath, size</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ signedUrl()</div>
+      </div>
+      <!-- Reminder -->
+      <div style="border:1px solid #c9d2e0;border-radius:8px;overflow:hidden;background:#fff">
+        <div style="background:#3a4a6a;color:#fff;font-weight:700;font-size:12.5px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">Reminder</div>
+        <div style="padding:6px 10px;border-bottom:1px solid #eef1f6;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#42536f;line-height:1.65">− onDate, text<br>− done</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ toggle()</div>
+      </div>
+      <!-- ReminderService -->
+      <div style="border:1px dashed #8a6d3f;border-radius:8px;overflow:hidden;background:#fdfaf3">
+        <div style="background:#8a6d3f;color:#fff;font-weight:700;font-size:12px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">«service» ReminderService</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ scanMissingDates()<br>+ dueToday(case): bool<br>+ everyTwoDays(trig)</div>
+      </div>
+      <!-- BengaliCalendar -->
+      <div style="border:1px dashed #8a6d3f;border-radius:8px;overflow:hidden;background:#fdfaf3">
+        <div style="background:#8a6d3f;color:#fff;font-weight:700;font-size:12px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">«service» BengaliCalendar</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ toBengali(greg): BnDate<br>+ label(greg): string</div>
+      </div>
+      <!-- NotificationService -->
+      <div style="border:1px dashed #8a6d3f;border-radius:8px;overflow:hidden;background:#fdfaf3">
+        <div style="background:#8a6d3f;color:#fff;font-weight:700;font-size:12px;padding:6px 10px;text-align:center;font-family:'Source Serif 4',serif">«service» NotificationService</div>
+        <div style="padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:#1c6b3f;line-height:1.65">+ send(channel, msg)<br>+ log(entry)</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#8a93a3;line-height:1.5">Associations — Advocate ◆—∞ Case, Client; Case ◆—∞ Party, OpposingCounsel, Hearing, Payment, Document (composition, cascade). ReminderService reads Case + writes Reminder / NotificationService; BengaliCalendar is a pure helper used by the calendar view.</div>
+
+    <!-- ===================== 6 · SEQUENCE DIAGRAMS ===================== -->
+    <h2 class="pb" style="font-family:'Source Serif 4',serif;font-size:20px;margin:8px 0 4px;color:#16243f">7 · Sequence Diagrams</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:12px"></div>
+    <p style="font-size:12px;color:#5b6678;line-height:1.55;margin:0 0 10px">UML 2.5.1 notation — participants sit on <b>lifelines</b> (dashed verticals); narrow bars are <b>execution occurrences</b> (activations); a solid filled arrow is a synchronous <b>message</b>, a dashed arrow is a <b>reply</b>; the <span style="font-family:'IBM Plex Mono',monospace">loop</span> rectangle is an interaction <b>combined fragment</b>.</p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:18px;font-size:10px;color:#5b6678;align-items:center">
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:26px;height:0;border-top:1.7px solid #16243f;position:relative"><span style="position:absolute;right:-1px;top:-3px;width:0;height:0;border-top:3px solid transparent;border-bottom:3px solid transparent;border-left:6px solid #16243f"></span></span> sync message</span>
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:26px;height:0;border-top:1.5px dashed #8a93a3"></span> reply</span>
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="display:inline-block;width:8px;height:12px;background:#d7deea;border:1px solid #93a1bd"></span> execution</span>
+      <span style="display:inline-flex;align-items:center;gap:6px"><span style="font-size:8px;font-weight:700;color:#fff;background:#c9a24a;padding:1px 5px;border-radius:3px">loop</span> fragment</span>
+    </div>
+
+    <!-- 7.1 Forward -->
+    <div class="tbl" style="margin-bottom:26px">
+      <div style="font-size:13.5px;font-weight:700;color:#16243f;margin-bottom:12px">7.1 · Forward a matter to its next date <span style="font-weight:500;color:#8a93a3">(FR-E1 / E2 / E4)</span></div>
+      <div style="position:relative;height:296px;width:100%;border:1px solid #ece9e3;border-radius:8px;background:#fdfdfb">
+        <!-- lifelines -->
+        <div style="position:absolute;left:11%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <div style="position:absolute;left:38%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <div style="position:absolute;left:64%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <div style="position:absolute;left:89%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <!-- activations -->
+        <div style="position:absolute;left:38%;top:66px;height:194px;width:8px;transform:translateX(-50%);background:#d7deea;border:1px solid #93a1bd;z-index:1"></div>
+        <div style="position:absolute;left:64%;top:104px;height:118px;width:8px;transform:translateX(-50%);background:#d7deea;border:1px solid #93a1bd;z-index:1"></div>
+        <div style="position:absolute;left:89%;top:142px;height:42px;width:8px;transform:translateX(-50%);background:#d7deea;border:1px solid #93a1bd;z-index:1"></div>
+        <!-- heads -->
+        <div style="position:absolute;left:11%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#16243f;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">Advocate</span></div>
+        <div style="position:absolute;left:38%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#3a4a6a;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">Diary UI</span></div>
+        <div style="position:absolute;left:64%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#3a4a6a;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">API / Server</span></div>
+        <div style="position:absolute;left:89%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#3a4a6a;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">Database</span></div>
+        <!-- messages -->
+        <div style="position:absolute;left:11%;width:27%;top:54px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin-bottom:3px;line-height:1.2">1: open case · tap Forward(date)</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+        <div style="position:absolute;left:38%;width:26%;top:92px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin-bottom:3px;line-height:1.2">2: POST /cases/:id/forward {nextDate}</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+        <div style="position:absolute;left:64%;width:25%;top:130px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin-bottom:3px;line-height:1.2">3: INSERT hearing · UPDATE next_date</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+        <div style="position:absolute;left:64%;width:25%;top:170px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#8a93a3;font-style:italic;text-align:center;margin-bottom:3px;line-height:1.2">4: ok (row)</div><div style="position:relative;height:0;border-top:1.5px dashed #8a93a3"><div style="position:absolute;left:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:7px solid #8a93a3"></div></div></div>
+        <div style="position:absolute;left:38%;width:26%;top:208px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#8a93a3;font-style:italic;text-align:center;margin-bottom:3px;line-height:1.2">5: updated case (no longer missing)</div><div style="position:relative;height:0;border-top:1.5px dashed #8a93a3"><div style="position:absolute;left:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:7px solid #8a93a3"></div></div></div>
+        <div style="position:absolute;left:11%;width:27%;top:246px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#8a93a3;font-style:italic;text-align:center;margin-bottom:3px;line-height:1.2">6: toast — "Forwarded"</div><div style="position:relative;height:0;border-top:1.5px dashed #8a93a3"><div style="position:absolute;left:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:7px solid #8a93a3"></div></div></div>
+      </div>
+      <div style="font-size:11px;color:#8a93a3;line-height:1.5;margin-top:8px">The old date keeps a dated appearance record (FR-E2); once <span style="font-family:'IBM Plex Mono',monospace">next_date</span> is set the matter is no longer "missing".</div>
+    </div>
+
+    <!-- 7.2 Missing-date reminder -->
+    <div class="tbl" style="margin-bottom:10px">
+      <div style="font-size:13.5px;font-weight:700;color:#16243f;margin-bottom:12px">7.2 · Missing-date reminder job <span style="font-weight:500;color:#8a93a3">(FR-E3 / E6 / G2)</span></div>
+      <div style="position:relative;height:332px;width:100%;border:1px solid #ece9e3;border-radius:8px;background:#fdfdfb">
+        <!-- lifelines -->
+        <div style="position:absolute;left:9%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <div style="position:absolute;left:31%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <div style="position:absolute;left:52%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <div style="position:absolute;left:73%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <div style="position:absolute;left:92%;top:34px;bottom:8px;border-left:1.5px dashed #c4ccd8"></div>
+        <!-- loop fragment -->
+        <div style="position:absolute;left:23%;width:74%;top:160px;height:158px;border:1.3px solid #c9a24a;border-radius:3px;z-index:0">
+          <div style="position:absolute;top:0;left:0;background:#c9a24a;color:#fff;font-size:8.5px;font-weight:700;padding:2px 9px 2px 6px;border-radius:3px 0 8px 0;font-family:'IBM Plex Mono',monospace">loop</div>
+          <div style="position:absolute;top:3px;left:46px;font-size:9px;color:#8a6d3f;font-weight:600">[for each matter missing a date]</div>
+        </div>
+        <!-- activations -->
+        <div style="position:absolute;left:31%;top:62px;height:248px;width:8px;transform:translateX(-50%);background:#d7deea;border:1px solid #93a1bd;z-index:1"></div>
+        <div style="position:absolute;left:52%;top:100px;height:46px;width:8px;transform:translateX(-50%);background:#d7deea;border:1px solid #93a1bd;z-index:1"></div>
+        <div style="position:absolute;left:52%;top:296px;height:16px;width:8px;transform:translateX(-50%);background:#d7deea;border:1px solid #93a1bd;z-index:1"></div>
+        <div style="position:absolute;left:73%;top:224px;height:46px;width:8px;transform:translateX(-50%);background:#d7deea;border:1px solid #93a1bd;z-index:1"></div>
+        <!-- heads -->
+        <div style="position:absolute;left:9%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#8a6d3f;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">Scheduler</span></div>
+        <div style="position:absolute;left:31%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#3a4a6a;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">API / Server</span></div>
+        <div style="position:absolute;left:52%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#3a4a6a;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">Database</span></div>
+        <div style="position:absolute;left:73%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#3a4a6a;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">Notifier</span></div>
+        <div style="position:absolute;left:92%;top:6px;transform:translateX(-50%);z-index:3"><span style="background:#16243f;color:#fff;font-size:10px;font-weight:700;padding:5px 9px;border-radius:6px;white-space:nowrap">Advocate</span></div>
+        <!-- messages -->
+        <div style="position:absolute;left:9%;width:22%;top:50px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin-bottom:3px;line-height:1.2">1: daily tick — run()</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+        <div style="position:absolute;left:31%;width:21%;top:88px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin-bottom:3px;line-height:1.2">2: SELECT missing-date cases</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+        <div style="position:absolute;left:31%;width:21%;top:126px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#8a93a3;font-style:italic;text-align:center;margin-bottom:3px;line-height:1.2">3: rows[]</div><div style="position:relative;height:0;border-top:1.5px dashed #8a93a3"><div style="position:absolute;left:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:7px solid #8a93a3"></div></div></div>
+        <!-- self message 4 -->
+        <div style="position:absolute;left:31%;top:178px;z-index:2;display:flex;align-items:center;gap:7px"><div style="width:15px;height:18px;border:1.6px solid #16243f;border-left:none;border-radius:0 5px 5px 0;position:relative"><div style="position:absolute;left:-1px;bottom:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-right:7px solid #16243f"></div></div><span style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;line-height:1.2">4: trigger = elapsed / prev / received</span></div>
+        <!-- 5 send -->
+        <div style="position:absolute;left:31%;width:42%;top:206px;z-index:2"><div style="font-size:8.5px;font-family:'IBM Plex Mono',monospace;color:#8a6d3f;font-style:italic;text-align:center;line-height:1.2">[today ≥ trigger+1 · 2-day cadence]</div><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin:2px 0 3px;line-height:1.2">5: send(reminder)</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+        <div style="position:absolute;left:73%;width:19%;top:254px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin-bottom:3px;line-height:1.2">6: push / SMS</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+        <div style="position:absolute;left:31%;width:21%;top:290px;z-index:2"><div style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:#16243f;font-weight:600;text-align:center;margin-bottom:3px;line-height:1.2">7: INSERT notifications_log</div><div style="position:relative;height:0;border-top:1.7px solid #16243f"><div style="position:absolute;right:-1px;top:-4px;width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:7px solid #16243f"></div></div></div>
+      </div>
+      <div style="font-size:11px;color:#8a93a3;line-height:1.5;margin-top:8px">The job is idempotent per day; the 2-day cadence is evaluated from each matter's <b>trigger</b> date (FR-E6), so reminders begin the day after and repeat until a next date is set.</div>
+    </div>
+
+    <!-- ===================== 7 · MOBILE & PLAN Q&A ===================== -->
+    <h2 class="pb" style="font-family:'Source Serif 4',serif;font-size:20px;margin:8px 0 4px;color:#16243f">8 · Mobile Strategy &amp; Project Plan</h2>
+    <div style="height:2px;background:#ece9e3;margin-bottom:16px"></div>
+
+    <!-- Q1 -->
+    <div class="req" style="border:1px solid #e6e2da;border-radius:10px;overflow:hidden;margin-bottom:16px">
+      <div style="background:#16243f;color:#fff;padding:9px 14px;font-size:13.5px;font-weight:700">Q1 · Most users are on mobile — do I need to design again? Isn't this already responsive?</div>
+      <div style="padding:13px 15px;font-size:12.5px;color:#283246;line-height:1.6">
+        <p style="margin:0 0 9px"><b>Short answer: you do NOT need a redesign — but it is not yet truly responsive.</b> The current screens are <b>desktop-first</b>: a fixed ~1180px shell with a permanent left calendar column beside the case list, wide data tables (Pending / All Cases), and edit panels laid out in 2-column grids. On a phone these overflow and shrink below comfortable tap sizes.</p>
+        <p style="margin:0 0 9px">Keep everything that defines the product — the visual language, type, colours, components and copy. What's missing is a <b>responsive layer</b>: breakpoints and a few mobile-specific patterns so the same design reflows to one column.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+          <span style="font-size:11px;font-weight:700;color:#1c6b3f;background:#e7f1ec;border:1px solid #cfe6d6;padding:4px 10px;border-radius:7px">✓ Reuse design system</span>
+          <span style="font-size:11px;font-weight:700;color:#1c6b3f;background:#e7f1ec;border:1px solid #cfe6d6;padding:4px 10px;border-radius:7px">✓ Add breakpoints</span>
+          <span style="font-size:11px;font-weight:700;color:#9a3320;background:#fbece7;border:1px solid #f1cdc2;padding:4px 10px;border-radius:7px">✗ No full redesign</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="req" style="border:1px solid #e6e2da;border-radius:10px;overflow:hidden;margin-bottom:16px">
+      <div style="background:#16243f;color:#fff;padding:9px 14px;font-size:13.5px;font-weight:700">Q2 · How should I approach the project now? A breakdown to-do plan.</div>
+      <div style="padding:13px 15px">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:3px 8px;border-radius:6px;flex:0 0 64px;text-align:center">Phase 0</span><span style="font-size:12.5px;color:#283246;line-height:1.5"><b>Lock the spec.</b> Sign off this document; freeze schema &amp; the missing-date / reminder rules. Create the Supabase project (Postgres + Auth + Storage).</span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:3px 8px;border-radius:6px;flex:0 0 64px;text-align:center">Phase 1</span><span style="font-size:12.5px;color:#283246;line-height:1.5"><b>Data &amp; auth.</b> Build the tables, foreign keys, indexes and <b>Row-Level Security</b>; implement register / login + OTP and password reset.</span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:3px 8px;border-radius:6px;flex:0 0 64px;text-align:center">Phase 2</span><span style="font-size:12.5px;color:#283246;line-height:1.5"><b>Wire the existing UI to the API.</b> Replace the current <span style="font-family:'IBM Plex Mono',monospace">localStorage</span> demo store with real endpoints: case CRUD, parties &amp; contacts, scheduling / forward, personal reminders.</span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:3px 8px;border-radius:6px;flex:0 0 64px;text-align:center">Phase 3</span><span style="font-size:12.5px;color:#283246;line-height:1.5"><b>Responsive / mobile pass</b> (see Q3) — the single biggest UX win for your audience.</span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:3px 8px;border-radius:6px;flex:0 0 64px;text-align:center">Phase 4</span><span style="font-size:12.5px;color:#283246;line-height:1.5"><b>Notifications &amp; the reminder job.</b> Scheduled missing-date scan (§7.2), push / SMS / in-app delivery, notifications log.</span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:3px 8px;border-radius:6px;flex:0 0 64px;text-align:center">Phase 5</span><span style="font-size:12.5px;color:#283246;line-height:1.5"><b>Documents, payments, communication.</b> File upload + signed URLs, fee tracking diagram, WhatsApp/Bangla client updates.</span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#8a6d3f;background:#fbf2dc;padding:3px 8px;border-radius:6px;flex:0 0 64px;text-align:center">Phase 6</span><span style="font-size:12.5px;color:#283246;line-height:1.5"><b>Ship.</b> PWA + Android wrapper (Capacitor/TWA), Bangla i18n, audit log, encrypted backups, then a pilot with 3–5 advocates and iterate.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="req" style="border:1px solid #e6e2da;border-radius:10px;overflow:hidden;margin-bottom:8px">
+      <div style="background:#16243f;color:#fff;padding:9px 14px;font-size:13.5px;font-weight:700">Q3 · Making the mobile view perfect — concrete steps</div>
+      <div style="padding:13px 15px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 16px">
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Shell:</b> breakpoints at 1024 / 720 / 480px; below ~720px collapse the two-column layout to a single stacked column.</div>
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Calendar:</b> move the sidebar calendar into a slide-up sheet / drawer triggered from a top bar; keep the new month + year pickers.</div>
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Navigation:</b> add a bottom nav (Diary · Pending · All cases · New) with ≥ 44px targets and safe-area insets.</div>
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Lists:</b> the wide Pending / All-Cases tables become stacked cards on phones, full tables on desktop.</div>
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Case tile:</b> drop the left case-no panel inline; the edit grids collapse to one column with a sticky Save bar.</div>
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Inputs:</b> ≥ 16px font on inputs (stops iOS auto-zoom); full-width date/fee fields; native date pickers.</div>
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Performance:</b> test on low-end Android &amp; slow networks; lazy-load case files; cache for offline read (PWA).</div>
+          <div style="font-size:12px;color:#283246;line-height:1.5"><b style="color:#16243f">Touch:</b> swipe to expand a case, pull-to-refresh the day list, larger hit areas on Sunani/Todbir toggles.</div>
+        </div>
+        <div style="margin-top:12px;padding:10px 13px;background:#f6efe3;border:1px solid #e9d9bd;border-radius:9px;font-size:12px;color:#5b4a2a;line-height:1.5"><b>Next step (done):</b> the four mobile sample views — Day view, Calendar sheet, Pending cards, Case edit — are built in the <b>“Mobile Views”</b> file as the responsive build targets. Same components, added breakpoints; no visual redesign. <b>The live Diary, All&nbsp;Cases and Pending Dates screens now ship these breakpoints</b> \u2014 single-column shell, full-width case tiles, stacked calendar &amp; flexible search below ~880px (Create Case already used auto-fit grids).</div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="req" style="border:1px solid #e6e2da;border-radius:10px;overflow:hidden;margin-bottom:8px">
+      <div style="background:#16243f;color:#fff;padding:9px 14px;font-size:13.5px;font-weight:700">Q4 · Backend, database, hosting, version control, mobile — untangled (solo dev, 3–4 day deadline)</div>
+      <div style="padding:13px 15px">
+        <p style="margin:0 0 11px;font-size:12.5px;color:#283246;line-height:1.6">It feels like five problems; it is really <b>three free services</b> wired together once. Plain-English map first, then a day-by-day plan.</p>
+        <div style="padding:9px 12px;background:#16243f;border-radius:9px;margin-bottom:12px;font-size:12px;color:#dfe7f5;line-height:1.5">Your whole stack = <b style="color:#c7a25f">GitHub</b> (code) + <b style="color:#c7a25f">Supabase</b> (database + backend + auth) + <b style="color:#c7a25f">Vercel</b> (hosting). Three accounts, all free to start.</div>
+        <div style="display:flex;flex-direction:column;gap:0;margin-bottom:14px">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f1eee8"><span style="flex:0 0 116px;font-size:11px;font-weight:700;color:#16243f">Version control</span><span style="flex:0 0 132px;font-size:10.5px;font-weight:600;color:#8a6d3f;font-family:'IBM Plex Mono',monospace">Git + GitHub</span><span style="flex:1;font-size:11.5px;color:#283246;line-height:1.45">Save points for your code — undo anything, back it up. One-time setup.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f1eee8"><span style="flex:0 0 116px;font-size:11px;font-weight:700;color:#16243f">Database</span><span style="flex:0 0 132px;font-size:10.5px;font-weight:600;color:#8a6d3f;font-family:'IBM Plex Mono',monospace">Supabase (Postgres)</span><span style="flex:1;font-size:11.5px;color:#283246;line-height:1.45">Where every case &amp; client lives. Fully managed — you never run a server.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f1eee8"><span style="flex:0 0 116px;font-size:11px;font-weight:700;color:#16243f">Backend / API</span><span style="flex:0 0 132px;font-size:10.5px;font-weight:600;color:#8a6d3f;font-family:'IBM Plex Mono',monospace">Supabase auto-API + RLS</span><span style="flex:1;font-size:11.5px;color:#283246;line-height:1.45">Supabase turns your tables into a secure API; Row-Level Security keeps each advocate private. Very little custom code.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f1eee8"><span style="flex:0 0 116px;font-size:11px;font-weight:700;color:#16243f">Auth (login)</span><span style="flex:0 0 132px;font-size:10.5px;font-weight:600;color:#8a6d3f;font-family:'IBM Plex Mono',monospace">Supabase Auth</span><span style="flex:1;font-size:11.5px;color:#283246;line-height:1.45">Register / login + OTP, built in. No password handling of your own.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f1eee8"><span style="flex:0 0 116px;font-size:11px;font-weight:700;color:#16243f">Hosting</span><span style="flex:0 0 132px;font-size:10.5px;font-weight:600;color:#8a6d3f;font-family:'IBM Plex Mono',monospace">Vercel</span><span style="flex:1;font-size:11.5px;color:#283246;line-height:1.45">Where the app runs online; redeploys automatically on every GitHub push. Free tier.</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f1eee8"><span style="flex:0 0 116px;font-size:11px;font-weight:700;color:#16243f">Mobile pass</span><span style="flex:0 0 132px;font-size:10.5px;font-weight:600;color:#8a6d3f;font-family:'IBM Plex Mono',monospace">Responsive CSS</span><span style="flex:1;font-size:11.5px;color:#283246;line-height:1.45">NOT a separate app — just the Q3 breakpoints on these same screens.</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#fff;background:#16243f;padding:4px 9px;border-radius:6px;flex:0 0 56px;text-align:center">Day 1</span><span style="font-size:12px;color:#283246;line-height:1.5"><b>Foundation.</b> Create the 3 accounts; push current code to GitHub; create the Supabase project; paste the schema SQL (§2) &amp; turn on RLS; enable Auth (email + OTP); connect Vercel to the repo. <i>Goal: app is online, login works, DB ready.</i></span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#fff;background:#16243f;padding:4px 9px;border-radius:6px;flex:0 0 56px;text-align:center">Day 2</span><span style="font-size:12px;color:#283246;line-height:1.5"><b>Wire the data.</b> Swap <span style="font-family:'IBM Plex Mono',monospace">localStorage</span> for Supabase queries: list / create / edit case, forward, reminders, parties &amp; contacts. <i>Goal: one real case, end-to-end, on the live URL.</i></span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#fff;background:#16243f;padding:4px 9px;border-radius:6px;flex:0 0 56px;text-align:center">Day 3</span><span style="font-size:12px;color:#283246;line-height:1.5"><b>Mobile pass.</b> Apply the Q3 breakpoints to the 4 screens, using the “Mobile Views” samples as the target; test on your own phone. <i>Goal: usable one-handed.</i></span></div>
+          <div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:10px;font-weight:700;color:#fff;background:#16243f;padding:4px 9px;border-radius:6px;flex:0 0 56px;text-align:center">Day 4</span><span style="font-size:12px;color:#283246;line-height:1.5"><b>Reminder + ship.</b> Missing-date reminder via a Supabase scheduled function / cron (§7.2); WhatsApp client-update link; bug-fix; tag <span style="font-family:'IBM Plex Mono',monospace">v1.0</span> in Git. <i>Goal: shipped.</i></span></div>
+        </div>
+        <div style="margin-top:12px;padding:10px 13px;background:#fbece7;border:1px solid #f1cdc2;border-radius:9px;font-size:12px;color:#9a3320;line-height:1.5"><b>Cut list to hit the deadline — defer to AFTER launch:</b> document upload &amp; storage, the payment diagram, audit log, PWA / Android APK, full Bangla i18n, opposition-counsel mapping. Ship the core first: auth + cases + scheduling + reminders + mobile.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:34px;padding-top:16px;border-top:1px solid #ece9e3;font-size:11px;color:#9aa2b1;text-align:center">Lawyers Diary · Functional Requirements, Schema &amp; UML v1.1 · Confidential</div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:880,&quot;height&quot;:1100}}">
+class Component extends DCLogic {
+  tag(level) {
+    const map = { MUST: ['#fbe9e4', '#b23a22'], SHOULD: ['#fbf2dc', '#9a7416'], COULD: ['#eef1f6', '#42536f'] };
+    const [bg, c] = map[level] || map.COULD;
+    return { fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.4px', color: c, background: bg, padding: '2px 7px', borderRadius: '5px', flex: '0 0 auto', whiteSpace: 'nowrap' };
+  }
+  r(id, text, tag) { return { id, text, tag, tagStyle: this.tag(tag) }; }
+
+  renderVals() {
+    const modules = [
+      { title: 'A · Authentication & Accounts', items: [
+        this.r('FR-A1', 'An advocate can register with full name, mobile number, email and password; email must be unique.', 'MUST'),
+        this.r('FR-A2', 'Login by email + password, followed by a 6-digit OTP (SMS/email) verification step.', 'MUST'),
+        this.r('FR-A3', 'Password reset / "forgot password" via email or mobile OTP.', 'MUST'),
+        this.r('FR-A4', 'Persistent session ("remember this device") with secure token; explicit logout.', 'SHOULD'),
+        this.r('FR-A5', 'Each account is an isolated tenant — a user can never read or write another advocate\u2019s data.', 'MUST'),
+        this.r('FR-A6', 'Optional junior/clerk sub-users with scoped access under one chamber.', 'COULD'),
+      ] },
+      { title: 'B · Advocate Profile', items: [
+        this.r('FR-B1', 'Upload / change a profile photo; diary header shows the photo and "{First}\u2019s Diary".', 'MUST'),
+        this.r('FR-B2', 'Edit name, chamber/firm, Bar enrolment no., contact details.', 'MUST'),
+        this.r('FR-B3', 'Light / night-mode preference saved per user.', 'SHOULD'),
+        this.r('FR-B4', 'Default language (English / Bangla) for client messages.', 'SHOULD'),
+      ] },
+      { title: 'C · Case Management', items: [
+        this.r('FR-C1', 'Create, view, edit and delete a case (case no., type, court, stage, summary, notes).', 'MUST'),
+        this.r('FR-C2', 'Case types: Civil, Criminal, Family, Writ, Revision, Appeal, etc. (extensible list).', 'MUST'),
+        this.r('FR-C3', 'Inline edit panel updates fields; changes persist on save with confirmation.', 'MUST'),
+        this.r('FR-C4', 'A read-only Case File view shows order-sheet history, payments and client details.', 'MUST'),
+        this.r('FR-C5', 'Per-case private "to-do / DO" note, editable by the advocate.', 'MUST'),
+        this.r('FR-C6', 'Court\u2019s order / proceeding text is recorded per hearing (shown as court-fixed).', 'MUST'),
+        this.r('FR-C7', 'Soft-delete with undo window; hard-delete after confirmation.', 'SHOULD'),
+        this.r('FR-C8', 'Tag / link related cases (e.g. a revision connected to a suit).', 'COULD'),
+      ] },
+      { title: 'D · Parties & Representation', items: [
+        this.r('FR-D1', 'Each case has ordered plaintiff(s)/petitioner(s) and defendant(s)/respondent(s) with numbers (A1, B1\u2026).', 'MUST'),
+        this.r('FR-D2', 'Mark which party/parties are "my client(s)"; my-client labels show the party number.', 'MUST'),
+        this.r('FR-D3', 'Opposition lawyer(s) recorded with name + contact, and which numbered party they appear for.', 'MUST'),
+        this.r('FR-D4', 'Support multiple opposition lawyers, each mapped to one or more defendants.', 'SHOULD'),
+        this.r('FR-D5', 'Reuse a client across multiple cases; client profile aggregates their matters.', 'MUST'),
+        this.r('FR-D6', 'A communication person and a care-of (c/o) person \u2014 each with name + mobile \u2014 are captured per side at case creation. In the daily diary they appear as READ-ONLY fields sourced from the case file (edited only through the case, never re-typed in the day view).', 'MUST'),
+      ] },
+      { title: 'E · Scheduling & Forwarding', items: [
+        this.r('FR-E1', 'Record previous date, today\u2019s fee and a forward-to-next-date in one action.', 'MUST'),
+        this.r('FR-E2', '"Forward & keep record" moves the matter to the new date and leaves a dated appearance record on the old date.', 'MUST'),
+        this.r('FR-E3', 'A matter is "missing a next date" when it has NO next date, OR when its last fixed date has already passed without a fresh date being taken (e.g. the court adjourned the hearing but fixed no new date). Both states are flagged and surfaced for follow-up.', 'MUST'),
+        this.r('FR-E4', 'Each forward appends an entry to the order-sheet / hearing history.', 'MUST'),
+        this.r('FR-E5', 'Detect/ warn on a date clash (two hearings same day) — informational.', 'COULD'),
+        this.r('FR-E6', 'The TRIGGER DATE of a missing matter is that elapsed last-fixed date (else the previous date, else the date the file was received). Reminders begin the day AFTER the trigger date.', 'MUST'),
+      ] },
+      { title: 'F · Calendar & Cause List', items: [
+        this.r('FR-F1', 'Month calendar with a per-day hearing count badge.', 'MUST'),
+        this.r('FR-F2', 'Selecting a date shows that day\u2019s cause list; "Today" and clear-date shortcuts.', 'MUST'),
+        this.r('FR-F3', 'At-a-glance counters: today, next 7 days, active matters.', 'MUST'),
+        this.r('FR-F4', 'All-Cases page: full list searchable by mobile no, case no, party, court or type.', 'MUST'),
+        this.r('FR-F5', 'Printable / exportable daily cause list.', 'SHOULD'),
+        this.r('FR-F6', 'Calendar month AND year are quick-selectable via dropdowns (not only month arrows), so the advocate can jump across years in one tap.', 'SHOULD'),
+        this.r('FR-F7', 'The Bengali (Bangabda) calendar date for the selected English date is shown beneath the calendar \u2014 revised Bangladesh rule (Pohela Boishakh = 14 April); derived at runtime, never stored.', 'SHOULD'),
+        this.r('FR-F8', 'Day Summary: a printable end-of-day report for any date (its hearings, today\u2019s action, notes). It is DERIVED from existing data; persisting it (day_logs) is optional \u2014 only to keep an end-of-day note, a fee total, or a frozen snapshot.', 'SHOULD'),
+      ] },
+      { title: 'G · Reminders & Notifications', items: [
+        this.r('FR-G1', 'Personal day reminders (to-dos) per calendar date, add/edit/complete/delete.', 'MUST'),
+        this.r('FR-G2', 'Automatic recurring reminder (every ~2 days) for any matter MISSING a next date, starting the day after its trigger date (elapsed hearing date, previous date, or \u2014 for a new file \u2014 the date received), until a fresh date is set.', 'MUST'),
+        this.r('FR-G3', 'Pre-hearing reminder N days before a next date.', 'SHOULD'),
+        this.r('FR-G4', 'Delivery channels: in-app, push, email; optionally SMS/WhatsApp.', 'SHOULD'),
+        this.r('FR-G5', 'Per-user notification preferences and quiet hours.', 'COULD'),
+      ] },
+      { title: 'H · Payments & Fees', items: [
+        this.r('FR-H1', 'Record fee receipts per case, typed as honorarium/retainer or task/step fee.', 'MUST'),
+        this.r('FR-H2', 'Case File shows a payment diagram splitting honorarium vs task fees with totals.', 'MUST'),
+        this.r('FR-H3', 'Currency BDT (\u09f3); amount, date and label per entry.', 'MUST'),
+        this.r('FR-H4', 'Outstanding / agreed-fee tracking and balance due.', 'SHOULD'),
+        this.r('FR-H5', 'Export a client fee statement (PDF).', 'COULD'),
+      ] },
+      { title: 'I · Documents & Files', items: [
+        this.r('FR-I1', 'Upload JPG/PNG/PDF/DOC files against a case; list, open, print, remove.', 'MUST'),
+        this.r('FR-I2', 'Files stored in object storage; access via short-lived signed URLs.', 'MUST'),
+        this.r('FR-I3', 'File size/type validation and virus scanning on upload.', 'SHOULD'),
+        this.r('FR-I4', 'Capture from phone camera (scan document).', 'COULD'),
+      ] },
+      { title: 'J · Client Communication', items: [
+        this.r('FR-J1', 'Generate a client update message (English/Bangla) from the latest order + next date.', 'MUST'),
+        this.r('FR-J2', 'Send via WhatsApp deep-link or copy to clipboard.', 'MUST'),
+        this.r('FR-J3', 'Log which updates were sent and when.', 'SHOULD'),
+        this.r('FR-J4', 'Templated, official WhatsApp Business API delivery.', 'COULD'),
+      ] },
+      { title: 'K · Search', items: [
+        this.r('FR-K1', 'Global search across case no, party names, mobile numbers, court and type.', 'MUST'),
+        this.r('FR-K2', 'Filter by date, case type and "needs next date".', 'SHOULD'),
+        this.r('FR-K3', 'Full-text search inside notes / order sheets.', 'COULD'),
+      ] },
+      { title: 'L · Security, Isolation & Audit', items: [
+        this.r('FR-L1', 'Row-Level Security enforces tenant isolation at the database.', 'MUST'),
+        this.r('FR-L2', 'All traffic over HTTPS; secrets server-side only.', 'MUST'),
+        this.r('FR-L3', 'Encrypt files and database at rest.', 'MUST'),
+        this.r('FR-L4', 'Audit log of create/update/delete on cases, payments and files.', 'SHOULD'),
+        this.r('FR-L5', 'Per-user data export and account deletion (data-protection).', 'SHOULD'),
+        this.r('FR-L6', 'Automated encrypted backups with tested restore.', 'MUST'),
+      ] },
+      { title: 'M · Non-functional', items: [
+        this.r('FR-M1', 'Mobile-first responsive UI; primary tap targets \u2265 44px.', 'MUST'),
+        this.r('FR-M2', 'Works on low-end Android browsers; usable on slow networks.', 'MUST'),
+        this.r('FR-M3', 'Installable as PWA (offline read of cached cases).', 'SHOULD'),
+        this.r('FR-M4', 'Packageable as an Android APK (Capacitor / TWA wrapper).', 'SHOULD'),
+        this.r('FR-M5', 'Bangla + English UI strings (i18n-ready).', 'SHOULD'),
+      ] },
+    ];
+
+    const col = (name, type, note) => ({ name, type, note });
+    const tables = [
+      { name: 'advocates', note: 'one row per registered lawyer (tenant root)', cols: [
+        col('id', 'uuid PK', 'matches auth user id'),
+        col('full_name', 'text', 'e.g. "Adv. Shaon Rahman"'),
+        col('email', 'citext UNIQUE', 'login identity'),
+        col('phone', 'text', 'mobile number'),
+        col('bar_enrolment_no', 'text', 'optional'),
+        col('photo_path', 'text', 'storage key for profile picture'),
+        col('theme', 'text', "'light' | 'dark'"),
+        col('default_lang', 'text', "'en' | 'bn'"),
+      ] },
+      { name: 'clients', note: 'people/companies the advocate represents', cols: [
+        col('id', 'uuid PK', ''),
+        col('advocate_id', 'uuid FK \u2192 advocates', 'tenant owner'),
+        col('name', 'text', ''),
+        col('role', 'text', 'e.g. Plaintiff / Petitioner'),
+        col('phone', 'text', 'searchable'),
+        col('address', 'text', ''),
+        col('client_since', 'date', ''),
+      ] },
+      { name: 'cases', note: 'a matter / suit', cols: [
+        col('id', 'uuid PK', ''),
+        col('advocate_id', 'uuid FK \u2192 advocates', 'tenant owner'),
+        col('client_id', 'uuid FK \u2192 clients', 'primary client (nullable)'),
+        col('case_no', 'text', 'e.g. "Title Suit 184/2024"'),
+        col('type', 'text', 'Civil/Criminal/Family/Writ\u2026'),
+        col('court', 'text', 'full court name'),
+        col('court_short', 'text', 'abbreviated'),
+        col('stage', 'text', 'current stage label'),
+        col('stage_type', 'text', 'evidence/hearing/argument/pending'),
+        col('prev_date', 'date', 'last hearing'),
+        col('next_date', 'date', 'next hearing (null \u21d2 reminder)'),
+        col('court_order', 'text', 'latest order / proceeding'),
+        col('todo', 'text', 'private "DO" note'),
+        col('notes', 'text', 'special notes'),
+        col('summary', 'text', 'matter summary'),
+        col('received_date', 'date', 'date the file was received'),
+        col('comm_name', 'text', 'communication person (intake)'),
+        col('comm_phone', 'text', 'their mobile'),
+        col('care_name', 'text', 'care-of (c/o) person (intake)'),
+        col('care_phone', 'text', 'their mobile'),
+      ] },
+      { name: 'case_parties', note: 'ordered parties on each side', cols: [
+        col('id', 'uuid PK', ''),
+        col('case_id', 'uuid FK \u2192 cases', ''),
+        col('side', 'text', "'plaintiff' | 'defendant'"),
+        col('position', 'int', '1,2,3 \u2192 A1/B2\u2026'),
+        col('name', 'text', ''),
+        col('is_mine', 'boolean', 'true \u21d2 my client'),
+        col('client_id', 'uuid FK \u2192 clients', 'nullable link'),
+        col('phone', 'text', ''),
+      ] },
+      { name: 'opposing_counsel', note: 'opposition lawyers + who they appear for', cols: [
+        col('id', 'uuid PK', ''),
+        col('case_id', 'uuid FK \u2192 cases', ''),
+        col('name', 'text', ''),
+        col('phone', 'text', ''),
+        col('represents', 'int[]', 'party positions on the other side'),
+      ] },
+      { name: 'hearings', note: 'order-sheet / appearance history', cols: [
+        col('id', 'uuid PK', ''),
+        col('case_id', 'uuid FK \u2192 cases', ''),
+        col('date', 'date', 'hearing date'),
+        col('kind', 'text', 'filing/order/evidence/hearing/disposal'),
+        col('title', 'text', 'short headline'),
+        col('note', 'text', 'what happened'),
+        col('forwarded_to', 'date', 'next date taken (nullable)'),
+      ] },
+      { name: 'payments', note: 'fees received from clients', cols: [
+        col('id', 'uuid PK', ''),
+        col('case_id', 'uuid FK \u2192 cases', ''),
+        col('advocate_id', 'uuid FK \u2192 advocates', ''),
+        col('type', 'text', "'honorarium' | 'task'"),
+        col('label', 'text', 'description'),
+        col('amount', 'numeric(12,2)', 'BDT'),
+        col('paid_on', 'date', ''),
+      ] },
+      { name: 'documents', note: 'uploaded case files', cols: [
+        col('id', 'uuid PK', ''),
+        col('case_id', 'uuid FK \u2192 cases', ''),
+        col('file_name', 'text', ''),
+        col('storage_path', 'text', 'object-storage key'),
+        col('mime_type', 'text', ''),
+        col('size_bytes', 'bigint', ''),
+        col('uploaded_at', 'timestamptz', ''),
+      ] },
+      { name: 'reminders', note: 'personal day to-dos', cols: [
+        col('id', 'uuid PK', ''),
+        col('advocate_id', 'uuid FK \u2192 advocates', ''),
+        col('on_date', 'date', 'the day it belongs to'),
+        col('text', 'text', ''),
+        col('done', 'boolean', ''),
+      ] },
+      { name: 'day_logs', note: 'OPTIONAL \u2014 per-day note / frozen summary (Day Summary is otherwise derived)', cols: [
+        col('id', 'uuid PK', ''),
+        col('advocate_id', 'uuid FK \u2192 advocates', 'tenant owner'),
+        col('on_date', 'date', 'one row per day (UNIQUE per advocate)'),
+        col('note', 'text', 'end-of-day free text'),
+        col('fees_total', 'numeric(12,2)', 'cached \u09f3 collected that day'),
+        col('snapshot', 'jsonb', 'optional frozen cause-list copy'),
+      ] },
+      { name: 'notifications_log', note: 'sent reminders / client updates', cols: [
+        col('id', 'uuid PK', ''),
+        col('advocate_id', 'uuid FK \u2192 advocates', ''),
+        col('case_id', 'uuid FK \u2192 cases', 'nullable'),
+        col('channel', 'text', 'inapp/push/email/sms/whatsapp'),
+        col('kind', 'text', 'blank-date / pre-hearing / client-update'),
+        col('sent_at', 'timestamptz', ''),
+      ] },
+    ];
+
+    const rules = [
+      'advocates 1\u2014\u221E clients, cases, payments, reminders. Deleting an advocate cascades to all owned data.',
+      'cases 1\u2014\u221E case_parties, opposing_counsel, hearings, payments, documents (ON DELETE CASCADE).',
+      'clients 1\u2014\u221E cases; a client may appear on many cases, a case has one primary client + many parties.',
+      'opposing_counsel.represents holds the numbered defendant/plaintiff positions a counsel appears for (D3/D4).',
+      'A case is "missing a next date" when next_date IS NULL OR next_date < current_date with no later hearing forwarded. The trigger date = that elapsed next_date (else prev_date, else received_date); the reminder job (FR-G2) fires from trigger + 1 day, every ~2 days.',
+      'Communication & care-of contacts are captured at intake (on the case) and rendered READ-ONLY in the daily diary; they are edited through the case file, not the day view.',
+      'The Bengali (Bangabda) date is computed from the Gregorian date at runtime (Pohela Boishakh = 14 April; first five months 31 days, rest 30, Falgun 31 in a Gregorian leap year) and is never persisted.',
+      'Do you need a day-summary table? No \u2014 the Day Summary is DERIVED at read time from cases + hearings + payments for the chosen date. The optional day_logs table only persists an end-of-day note, the day\u2019s fee total, or a frozen snapshot (so a printed summary will not change if a case is edited later).',
+      'RLS policy on every tenant table: advocate_id = auth.uid() (cases reached via their advocate_id; children via their parent\u2019s advocate_id).',
+      'Indexes: cases(advocate_id, next_date), case_parties(case_id), payments(case_id), and a search index over case_no / party name / phone.',
+    ];
+
+    return { modules, tables, rules, onPrint: () => { try { window.print(); } catch (e) {} } };
+  }
+}
+</script>
+</body>
+</html>

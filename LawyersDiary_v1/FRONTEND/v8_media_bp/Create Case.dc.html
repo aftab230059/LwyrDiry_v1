@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+  input, textarea, select { font: inherit; }
+  textarea { resize: vertical; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #d9d4cb; border-radius: 8px; border: 2px solid var(--bg,#f3f1ec); }
+  @keyframes ldPop { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes ldToast { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  /* ===== night mode tokens (light uses inline fallbacks; dark redefines) ===== */
+  [data-theme="dark"]{ color-scheme:dark; --header:rgba(17,20,26,0.86);
+    --bg:#13161c; --surface:#1d222c; --brand:#22324f; --brand-hover:#2c3f63;
+    --ink:#e8edf6; --ink2:#c3ccdb; --muted:#9aa6bc; --muted2:#828ea4; --faint:#6d7889;
+    --line:#2e3540; --fill:#242b36;
+    --blue-fill:#1d2a3f; --blue-line:#2c3a52; --blue-ink:#8fb0e6;
+    --gold-fill:#2a2517; --gold-line:#473d23;
+    --green-fill:#172519; --green-line:#27402e; --green-ink:#73c993;
+    --pink-fill:#321f1b; --pink-line:#552f27; --red-ink:#f0a48d; }
+  [data-theme="dark"] ::placeholder{ color:#727d8f; opacity:1; }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb{ background:#3a414e; border-color:#13161c; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--bg,#f3f1ec);color:var(--ink,#16243f);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased">
+
+  <!-- top bar -->
+  <header style="position:sticky;top:0;z-index:10;background:var(--header,rgba(251,250,248,0.92));backdrop-filter:blur(8px);border-bottom:1px solid var(--line,#e6e2da)">
+    <div style="max-width:880px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <a href="Lawyers Diary.dc.html" style="display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;color:var(--muted,#5b6678);text-decoration:none" style-hover="color:var(--ink,#16243f)">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Back
+      </a>
+      <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:15px">New case</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onClick="{{ onToggleTheme }}" aria-label="Toggle night mode" title="Toggle night mode" style="width:38px;height:38px;flex:0 0 auto;border-radius:9px;border:1px solid var(--line,#e2ddd4);background:var(--surface,#fff);color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="color:var(--ink,#16243f);border-color:var(--gold-line,#c7a25f)">
+          <sc-if value="{{ lightMode }}" hint-placeholder-val="{{ true }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </sc-if>
+          <sc-if value="{{ dark }}" hint-placeholder-val="{{ false }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><line x1="4.9" y1="4.9" x2="7" y2="7"></line><line x1="17" y1="17" x2="19.1" y2="19.1"></line><line x1="4.9" y1="19.1" x2="7" y2="17"></line><line x1="17" y1="7" x2="19.1" y2="4.9"></line></svg>
+          </sc-if>
+        </button>
+        <button onClick="{{ onSave }}" style="display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;color:#fff;background:var(--brand,#16243f);padding:9px 16px;border-radius:9px" style-hover="background:var(--brand-hover,#0f1a30)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Save
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main style="max-width:880px;margin:0 auto;padding:20px 18px 80px">
+
+    <!-- intro -->
+    <div style="margin-bottom:16px">
+      <h1 style="margin:0 0 5px;font-family:'Source Serif 4',serif;font-weight:600;font-size:24px;line-height:1.15">Add a case to your diary</h1>
+      <p style="margin:0;font-size:13.5px;line-height:1.5;color:var(--muted,#5b6678);max-width:600px">Only the case number and court are required. Fields marked <span style="color:#c0492f;font-weight:600">*</span> are needed to save.</p>
+    </div>
+
+    <!-- ===== 1. CASE IDENTITY ===== -->
+    <section style="background:var(--surface,#fff);border:1px solid var(--line,#e6e2da);border-radius:14px;padding:16px 18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="width:26px;height:26px;border-radius:50%;background:var(--brand,#16243f);color:#c7a25f;display:flex;align-items:center;justify-content:center;font-family:'Source Serif 4',serif;font-weight:700;font-size:14px;flex:0 0 auto">1</span>
+        <div>
+          <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:16px">The case</div>
+          <div style="font-size:12px;color:var(--muted2,#8a93a3)">Case number, type and which court it is in.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <label style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Case number <span style="color:#c0492f">*</span></span>
+          <input value="{{ caseNo }}" onInput="{{ onCaseNo }}" placeholder="e.g. Chagolnaiya Deo-27/19" style="{{ caseNoStyle }}" />
+        </label>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+          <label style="display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Type of case</span>
+            <select value="{{ type }}" onChange="{{ onType }}" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none">
+              <option value="Civil">Civil</option>
+              <option value="Criminal">Criminal</option>
+              <option value="Family">Family</option>
+              <option value="Writ">Writ</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <sc-if value="{{ isOther }}" hint-placeholder-val="{{ false }}">
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Type the case type</span>
+              <input value="{{ otherType }}" onInput="{{ onOtherType }}" placeholder="e.g. Land Survey Appeal" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none" />
+            </label>
+          </sc-if>
+        </div>
+
+        <label style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Court name <span style="color:#c0492f">*</span></span>
+          <input value="{{ court }}" onInput="{{ onCourt }}" placeholder="e.g. Senior Assistant Judge Court, Chagolnaiya, Feni" style="{{ courtStyle }}" />
+        </label>
+      </div>
+    </section>
+
+    <!-- ===== 2. PARTIES ===== -->
+    <section style="background:var(--surface,#fff);border:1px solid var(--line,#e6e2da);border-radius:14px;padding:16px 18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="width:26px;height:26px;border-radius:50%;background:var(--brand,#16243f);color:#c7a25f;display:flex;align-items:center;justify-content:center;font-family:'Source Serif 4',serif;font-weight:700;font-size:14px;flex:0 0 auto">2</span>
+        <div>
+          <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:16px">Who versus who</div>
+          <div style="font-size:12px;color:var(--muted2,#8a93a3)">Both sides, their contacts, and the opposing lawyers.</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px">
+
+        <!-- PLAINTIFF -->
+        <div style="background:var(--fill,#faf8f4);border:1px solid var(--line,#efeae2);border-radius:12px;padding:13px 14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:#8a6d3f">PLAINTIFF</div>
+            <button onClick="{{ pf.onMine }}" style="{{ pf.mineStyle }}">{{ pf.mineLabel }}</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:12px;font-weight:600;color:var(--ink2,#3c485e)">Name of plaintiff</span>
+              <input value="{{ pf.name }}" onInput="{{ pf.onName }}" placeholder="e.g. Rhimullah and 5 ors." style="padding:9px 11px;border:1px solid var(--line,#e2ddd4);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;width:100%" />
+            </label>
+            <div style="border-top:1px solid var(--line,#efeae2);padding-top:9px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:var(--ink2,#3c485e)">Communication person</span>
+              <input value="{{ pf.commName }}" onInput="{{ pf.onCommName }}" placeholder="Name" style="padding:9px 11px;border:1px solid var(--line,#e2ddd4);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;width:100%" />
+              <sc-for list="{{ pf.commPhones }}" as="ph" hint-placeholder-count="1">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input value="{{ ph.value }}" onInput="{{ ph.onInput }}" placeholder="Mobile number" style="flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line,#e2ddd4);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;font-family:'IBM Plex Mono',monospace" />
+                  <sc-if value="{{ ph.canRemove }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ ph.onRemove }}" aria-label="Remove number" style="width:30px;height:30px;border-radius:7px;color:#b9947d;display:flex;align-items:center;justify-content:center;flex:0 0 auto" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <button onClick="{{ pf.onAddCommPhone }}" style="align-self:flex-start;font-size:12px;font-weight:600;color:#8a6d3f;padding:5px 9px;border-radius:7px;border:1px dashed #d8c79f" style-hover="background:var(--gold-fill,#f6efe3)">+ Add another number</button>
+            </div>
+            <div style="border-top:1px solid var(--line,#efeae2);padding-top:9px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:var(--ink2,#3c485e)">Care of (c/o) person</span>
+              <input value="{{ pf.careName }}" onInput="{{ pf.onCareName }}" placeholder="Name" style="padding:9px 11px;border:1px solid var(--line,#e2ddd4);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;width:100%" />
+              <sc-for list="{{ pf.carePhones }}" as="ph" hint-placeholder-count="1">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input value="{{ ph.value }}" onInput="{{ ph.onInput }}" placeholder="Mobile number" style="flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line,#e2ddd4);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;font-family:'IBM Plex Mono',monospace" />
+                  <sc-if value="{{ ph.canRemove }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ ph.onRemove }}" aria-label="Remove number" style="width:30px;height:30px;border-radius:7px;color:#b9947d;display:flex;align-items:center;justify-content:center;flex:0 0 auto" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <button onClick="{{ pf.onAddCarePhone }}" style="align-self:flex-start;font-size:12px;font-weight:600;color:#8a6d3f;padding:5px 9px;border-radius:7px;border:1px dashed #d8c79f" style-hover="background:var(--gold-fill,#f6efe3)">+ Add another number</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEFENDANT -->
+        <div style="background:var(--blue-fill,#f8f9fb);border:1px solid var(--line,#e8ecf2);border-radius:12px;padding:13px 14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--ink2,#42536f)">DEFENDANT</div>
+            <button onClick="{{ df.onMine }}" style="{{ df.mineStyle }}">{{ df.mineLabel }}</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <label style="display:flex;flex-direction:column;gap:5px">
+              <span style="font-size:12px;font-weight:600;color:var(--ink2,#3c485e)">Name of defendant</span>
+              <input value="{{ df.name }}" onInput="{{ df.onName }}" placeholder="e.g. Hasan and 45 ors." style="padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;width:100%" />
+            </label>
+            <sc-if value="{{ df.mine }}" hint-placeholder-val="{{ false }}">
+              <label style="display:flex;flex-direction:column;gap:5px">
+                <span style="font-size:12px;font-weight:600;color:var(--ink2,#42536f)">Which numbers are your clients?</span>
+                <input value="{{ df.clientNumbers }}" onInput="{{ df.onClientNumbers }}" placeholder="e.g. 17, 35 and 41 of 46 defendants" style="padding:9px 11px;border:1px solid var(--blue-line,#c6cedb);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;width:100%;font-family:'IBM Plex Mono',monospace" />
+              </label>
+            </sc-if>
+            <div style="border-top:1px solid var(--line,#e8ecf2);padding-top:9px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:var(--ink2,#3c485e)">Communication person</span>
+              <input value="{{ df.commName }}" onInput="{{ df.onCommName }}" placeholder="Name" style="padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;width:100%" />
+              <sc-for list="{{ df.commPhones }}" as="ph" hint-placeholder-count="1">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input value="{{ ph.value }}" onInput="{{ ph.onInput }}" placeholder="Mobile number" style="flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;font-family:'IBM Plex Mono',monospace" />
+                  <sc-if value="{{ ph.canRemove }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ ph.onRemove }}" aria-label="Remove number" style="width:30px;height:30px;border-radius:7px;color:#9aa6ba;display:flex;align-items:center;justify-content:center;flex:0 0 auto" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <button onClick="{{ df.onAddCommPhone }}" style="align-self:flex-start;font-size:12px;font-weight:600;color:var(--ink2,#42536f);padding:5px 9px;border-radius:7px;border:1px dashed #c6cedb" style-hover="background:var(--blue-fill,#f1f4f9)">+ Add another number</button>
+            </div>
+            <div style="border-top:1px solid var(--line,#e8ecf2);padding-top:9px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:600;color:var(--ink2,#3c485e)">Care of (c/o) person</span>
+              <input value="{{ df.careName }}" onInput="{{ df.onCareName }}" placeholder="Name" style="padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;width:100%" />
+              <sc-for list="{{ df.carePhones }}" as="ph" hint-placeholder-count="1">
+                <div style="display:flex;gap:6px;align-items:center">
+                  <input value="{{ ph.value }}" onInput="{{ ph.onInput }}" placeholder="Mobile number" style="flex:1;min-width:0;padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;font-family:'IBM Plex Mono',monospace" />
+                  <sc-if value="{{ ph.canRemove }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ ph.onRemove }}" aria-label="Remove number" style="width:30px;height:30px;border-radius:7px;color:#9aa6ba;display:flex;align-items:center;justify-content:center;flex:0 0 auto" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                  </sc-if>
+                </div>
+              </sc-for>
+              <button onClick="{{ df.onAddCarePhone }}" style="align-self:flex-start;font-size:12px;font-weight:600;color:var(--ink2,#42536f);padding:5px 9px;border-radius:7px;border:1px dashed #c6cedb" style-hover="background:var(--blue-fill,#f1f4f9)">+ Add another number</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPPOSITION LAWYERS -->
+      <div style="margin-top:14px;border-top:1px solid var(--line,#ece9e3);padding-top:13px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--ink2,#42536f);margin-bottom:10px">OPPOSITION LAWYER(S)</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ oppLawyers }}" as="o" hint-placeholder-count="1">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--blue-fill,#f8f9fb);border:1px solid var(--line,#e8ecf2);border-radius:10px;padding:9px 10px">
+              <input value="{{ o.name }}" onInput="{{ o.onName }}" placeholder="Lawyer's name" style="flex:1.5;min-width:140px;padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none" />
+              <input value="{{ o.phone }}" onInput="{{ o.onPhone }}" placeholder="Contact number" style="flex:1.1;min-width:130px;padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;font-family:'IBM Plex Mono',monospace" />
+              <input value="{{ o.forDefNos }}" onInput="{{ o.onForDef }}" placeholder="For defendant no(s). e.g. 3, 7" style="flex:1.3;min-width:150px;padding:9px 11px;border:1px solid var(--line,#dde2ea);border-radius:8px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;font-family:'IBM Plex Mono',monospace" />
+              <sc-if value="{{ o.canRemove }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ o.onRemove }}" aria-label="Remove lawyer" style="width:32px;height:32px;border-radius:8px;color:#9aa6ba;display:flex;align-items:center;justify-content:center;flex:0 0 auto" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+              </sc-if>
+            </div>
+          </sc-for>
+          <button onClick="{{ onAddOpp }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink2,#42536f);padding:6px 11px;border-radius:8px;border:1px dashed #c6cedb" style-hover="background:var(--blue-fill,#f1f4f9)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add opposition lawyer
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3. DATES & PLAN ===== -->
+    <section style="background:var(--surface,#fff);border:1px solid var(--line,#e6e2da);border-radius:14px;padding:16px 18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="width:26px;height:26px;border-radius:50%;background:var(--brand,#16243f);color:#c7a25f;display:flex;align-items:center;justify-content:center;font-family:'Source Serif 4',serif;font-weight:700;font-size:14px;flex:0 0 auto">3</span>
+        <div>
+          <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:16px">Dates &amp; what to do</div>
+          <div style="font-size:12px;color:var(--muted2,#8a93a3)">Leave the next date blank and the diary will remind you.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+          <label style="display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Date I received the file</span>
+            <input type="date" value="{{ receivedDate }}" onChange="{{ onReceivedDate }}" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Previous date</span>
+            <input type="date" value="{{ prevDate }}" onChange="{{ onPrevDate }}" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Next date</span>
+            <input type="date" value="{{ nextDate }}" onChange="{{ onNextDate }}" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none" />
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">What the court fixed the date for</span>
+          <input value="{{ courtOrder }}" onInput="{{ onCourtOrder }}" placeholder="e.g. Fixed for examination of PW-2; produce the surveyor" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;max-width:240px">
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Fee for the day (BDT)</span>
+          <input value="{{ fee }}" onInput="{{ onFee }}" placeholder="e.g. 5,000" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none" />
+        </label>
+      </div>
+    </section>
+
+    <!-- ===== 4. NOTES & FILES ===== -->
+    <section style="background:var(--surface,#fff);border:1px solid var(--line,#e6e2da);border-radius:14px;padding:16px 18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <span style="width:26px;height:26px;border-radius:50%;background:var(--brand,#16243f);color:#c7a25f;display:flex;align-items:center;justify-content:center;font-family:'Source Serif 4',serif;font-weight:700;font-size:14px;flex:0 0 auto">4</span>
+        <div>
+          <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:16px">Notes &amp; documents</div>
+          <div style="font-size:12px;color:var(--muted2,#8a93a3)">Private notes and any scans — deeds, cheques, orders.</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <label style="display:flex;flex-direction:column;gap:5px">
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e)">Special notes</span>
+          <textarea value="{{ notes }}" onInput="{{ onNotes }}" rows="2" placeholder="e.g. Original deeds in office vault, locker 3" style="padding:10px 12px;border:1px solid var(--line,#dcd6cc);border-radius:9px;background:var(--surface,#fff);font-size:14px;color:var(--ink,#16243f);outline:none;line-height:1.5;min-height:60px"></textarea>
+        </label>
+        <div>
+          <span style="font-size:12.5px;font-weight:600;color:var(--ink2,#3c485e);display:block;margin-bottom:8px">Documents</span>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ files }}" as="f" hint-placeholder-count="0">
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;background:var(--fill,#faf8f4);border:1px solid var(--line,#efeae2);border-radius:9px">
+                <span style="{{ f.typeStyle }}">{{ f.typeLabel }}</span>
+                <span style="flex:1;min-width:0;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.name }}</span>
+                <button onClick="{{ f.onRemove }}" aria-label="Remove" style="width:28px;height:28px;border-radius:7px;color:#b9947d;display:flex;align-items:center;justify-content:center" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+              </div>
+            </sc-for>
+            <label style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:1.5px dashed #d6cfc2;border-radius:10px;cursor:pointer;color:var(--muted,#5b6678);font-size:13.5px;font-weight:600" style-hover="background:var(--fill,#faf8f4);border-color:#b08d57;color:#8a6d3f">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              Upload JPG, DOC or PDF
+              <input type="file" accept=".jpg,.jpeg,.png,.doc,.docx,.pdf" multiple onChange="{{ onUpload }}" style="display:none" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- error -->
+    <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--pink-fill,#fbece7);border:1px solid var(--pink-line,#f1cdc2);border-radius:11px;margin-bottom:14px;color:var(--red-ink,#9a3320);font-size:13px;font-weight:600">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>
+        {{ errorText }}
+      </div>
+    </sc-if>
+
+    <!-- actions -->
+    <div style="display:flex;align-items:center;gap:10px">
+      <button onClick="{{ onSave }}" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;color:#fff;background:var(--brand,#16243f);padding:12px 22px;border-radius:11px" style-hover="background:var(--brand-hover,#0f1a30)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Save case to diary
+      </button>
+      <a href="Lawyers Diary.dc.html" style="font-size:13.5px;font-weight:600;color:var(--muted,#5b6678);padding:12px 16px;border-radius:11px;text-decoration:none" style-hover="color:var(--ink,#16243f)">Cancel</a>
+    </div>
+
+  </main>
+
+  <!-- success modal -->
+  <sc-if value="{{ saved }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:50;background:rgba(12,18,30,0.46);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:28px">
+      <div style="width:400px;max-width:100%;background:var(--bg,#fbfaf8);border-radius:16px;box-shadow:0 30px 80px -20px rgba(12,18,30,0.5);padding:26px 24px;text-align:center;animation:ldPop 0.2s cubic-bezier(0.2,0.8,0.2,1)">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--green-fill,#e7f1ec);display:flex;align-items:center;justify-content:center;margin:0 auto 14px">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2f7a5f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:19px">Case saved</div>
+        <div style="font-size:13.5px;color:var(--muted,#5b6678);line-height:1.5;margin-top:5px">{{ savedName }} has been added to your diary.</div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:18px">
+          <a href="Lawyers Diary.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:600;color:#fff;background:var(--brand,#16243f);padding:11px 0;border-radius:10px;text-decoration:none" style-hover="background:var(--brand-hover,#0f1a30)">Open the diary</a>
+          <button onClick="{{ onAddAnother }}" style="font-size:13.5px;font-weight:600;color:var(--muted,#5b6678);padding:10px 0;border-radius:10px" style-hover="background:var(--fill,#f3f5f9)">Add another case</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- toast -->
+  <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:24px;left:50%;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:10px 16px;background:var(--brand,#16243f);color:#fff;border-radius:10px;box-shadow:0 16px 40px -12px rgba(12,18,30,0.5);font-size:13px;font-weight:600;animation:ldToast 0.22s ease">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      {{ toastText }}
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      dark: this.loadTheme(),
+      caseNo: '', type: 'Civil', otherType: '', court: '',
+      receivedDate: '', prevDate: '', nextDate: '', courtOrder: '', fee: '',
+      notes: '', files: [],
+      plaintiff: { name: '', mine: true, clientNumbers: '', commName: '', commPhones: [''], careName: '', carePhones: [''] },
+      defendant: { name: '', mine: false, clientNumbers: '', commName: '', commPhones: [''], careName: '', carePhones: [''] },
+      oppLawyers: [{ name: '', phone: '', forDefNos: '' }],
+      saved: false, savedName: '', error: '', toast: null,
+    };
+  }
+  NEW_KEY = 'ld_new_cases_v1';
+  MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  loadTheme() { try { return window.localStorage.getItem('ld_theme') === 'dark'; } catch (e) { return false; } }
+  applyTheme(d) { try { document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light'); } catch (e) {} }
+  toggleTheme = () => this.setState(s => { const d = !s.dark; try { window.localStorage.setItem('ld_theme', d ? 'dark' : 'light'); } catch (e) {} this.applyTheme(d); return { dark: d }; });
+  componentDidMount() { this.applyTheme(this.state.dark); }
+  componentWillUnmount() { clearTimeout(this._toastT); }
+  showToast(msg) { clearTimeout(this._toastT); this.setState({ toast: msg }); this._toastT = setTimeout(() => this.setState({ toast: null }), 1800); }
+
+  set(field) { return (e) => this.setState({ [field]: e.target.value, error: '' }); }
+
+  setParty(side, field, value) { this.setState(s => ({ [side]: { ...s[side], [field]: value }, error: '' })); }
+  toggleMine(side) { this.setState(s => ({ [side]: { ...s[side], mine: !s[side].mine } })); }
+  setPhone(side, kind, idx, value) { this.setState(s => { const arr = s[side][kind].map((p, i) => i === idx ? value : p); return { [side]: { ...s[side], [kind]: arr } }; }); }
+  addPhone(side, kind) { this.setState(s => ({ [side]: { ...s[side], [kind]: [...s[side][kind], ''] } })); }
+  removePhone(side, kind, idx) { this.setState(s => { const arr = s[side][kind].filter((_, i) => i !== idx); return { [side]: { ...s[side], [kind]: arr.length ? arr : [''] } }; }); }
+
+  setOpp(idx, field, value) { this.setState(s => ({ oppLawyers: s.oppLawyers.map((o, i) => i === idx ? { ...o, [field]: value } : o) })); }
+  addOpp = () => this.setState(s => ({ oppLawyers: [...s.oppLawyers, { name: '', phone: '', forDefNos: '' }] }));
+  removeOpp(idx) { this.setState(s => { const arr = s.oppLawyers.filter((_, i) => i !== idx); return { oppLawyers: arr.length ? arr : [{ name: '', phone: '', forDefNos: '' }] }; }); }
+
+  extType(name) {
+    const e = (name.split('.').pop() || '').toLowerCase();
+    if (e === 'pdf') return 'PDF';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(e)) return 'IMG';
+    if (['doc', 'docx'].includes(e)) return 'DOC';
+    return 'FILE';
+  }
+  fileTypeStyle(label) {
+    const map = { PDF: ['#fbe9e4', '#b23a22'], IMG: ['var(--green-fill,#e7f1ec)', '#2f7a5f'], DOC: ['#e8edf6', 'var(--blue-ink,#2a4d8f)'], FILE: ['var(--blue-fill,#eef1f6)', 'var(--muted,#5b6678)'] };
+    const [bg, c] = map[label] || map.FILE;
+    return { fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.3px', color: c, background: bg, padding: '3px 6px', borderRadius: '5px', flex: '0 0 auto' };
+  }
+  onUpload = (e) => {
+    const arr = [...e.target.files];
+    if (arr.length) {
+      const add = arr.map(f => ({ name: f.name, typeLabel: this.extType(f.name) }));
+      this.setState(s => ({ files: [...s.files, ...add] }));
+      this.showToast(add.length + ' file' + (add.length > 1 ? 's' : '') + ' added');
+    }
+    e.target.value = '';
+  };
+  removeFile(idx) { this.setState(s => ({ files: s.files.filter((_, i) => i !== idx) })); }
+
+  inputStyle(invalid) {
+    return { padding: '10px 12px', border: '1px solid ' + (invalid ? '#e2a594' : 'var(--line,#dcd6cc)'), borderRadius: '9px', background: invalid ? '#fdf4f1' : 'var(--surface,#fff)', fontSize: '14px', color: 'var(--ink,#16243f)', outline: 'none' };
+  }
+  mineStyle(active, gold) {
+    const onCol = gold ? '#8a6d3f' : 'var(--ink2,#42536f)';
+    const onBg = gold ? 'var(--gold-fill,#f6efe3)' : '#e8edf6';
+    const onBd = gold ? 'var(--gold-line,#e3cfa6)' : 'var(--blue-line,#c6cedb)';
+    return active
+      ? { display: 'inline-flex', alignItems: 'center', gap: '5px', flex: '0 0 auto', whiteSpace: 'nowrap', fontSize: '11.5px', fontWeight: 700, color: onCol, background: onBg, border: '1px solid ' + onBd, padding: '6px 10px', borderRadius: '8px' }
+      : { display: 'inline-flex', alignItems: 'center', gap: '5px', flex: '0 0 auto', whiteSpace: 'nowrap', fontSize: '11.5px', fontWeight: 600, color: 'var(--muted2,#8a93a3)', background: 'var(--surface,#fff)', border: '1px solid var(--line,#e2ddd4)', padding: '6px 10px', borderRadius: '8px' };
+  }
+
+  shortName(n) { return (n || '').split(' (')[0].split(' and ')[0]; }
+  courtShort(court) {
+    if (!court) return '';
+    const first = court.split(',')[0].trim();
+    return first.length > 26 ? first.slice(0, 24) + '\u2026' : first;
+  }
+  iso(dt) { return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0'); }
+
+  partyVals(side) {
+    const p = this.state[side];
+    const gold = side === 'plaintiff';
+    const mkPhones = (kind) => p[kind].map((v, i) => ({
+      value: v,
+      onInput: (e) => this.setPhone(side, kind, i, e.target.value),
+      onRemove: () => this.removePhone(side, kind, i),
+      canRemove: p[kind].length > 1,
+    }));
+    return {
+      name: p.name, onName: (e) => this.setParty(side, 'name', e.target.value),
+      mine: p.mine, mineLabel: p.mine ? '\u2713 My client' : 'My client?', mineStyle: this.mineStyle(p.mine, gold),
+      onMine: () => this.toggleMine(side),
+      clientNumbers: p.clientNumbers, onClientNumbers: (e) => this.setParty(side, 'clientNumbers', e.target.value),
+      commName: p.commName, onCommName: (e) => this.setParty(side, 'commName', e.target.value),
+      careName: p.careName, onCareName: (e) => this.setParty(side, 'careName', e.target.value),
+      commPhones: mkPhones('commPhones'), carePhones: mkPhones('carePhones'),
+      onAddCommPhone: () => this.addPhone(side, 'commPhones'),
+      onAddCarePhone: () => this.addPhone(side, 'carePhones'),
+    };
+  }
+
+  save = () => {
+    const st = this.state;
+    if (!st.caseNo.trim() || !st.court.trim()) {
+      this.setState({ error: 'Please fill in the case number and the court name to save.' });
+      return;
+    }
+    const typeFinal = st.type === 'Other' ? (st.otherType.trim() || 'Other') : st.type;
+    const opp = st.oppLawyers.filter(o => o.name.trim() || o.phone.trim() || o.forDefNos.trim())
+      .map(o => ({ name: o.name.trim(), phone: o.phone.trim(), forDefNos: o.forDefNos.trim() }));
+    const pPhone = (st.plaintiff.commPhones.find(x => x.trim()) || '').trim();
+    const dPhone = (st.defendant.commPhones.find(x => x.trim()) || '').trim();
+    const partiesA = [{ tag: 'A1', name: st.plaintiff.name.trim() || 'Plaintiff', mine: !!st.plaintiff.mine, phone: pPhone }];
+    const partiesB = [{ tag: 'B1', name: st.defendant.name.trim() || 'Defendant', mine: !!st.defendant.mine, phone: dPhone }];
+    const mine = st.plaintiff.mine ? partiesA[0] : (st.defendant.mine ? partiesB[0] : partiesA[0]);
+
+    const id = 'u' + Date.now().toString(36);
+    const today = new Date();
+    const sinceM = this.MONTHS_S[today.getMonth()];
+    const newCase = {
+      id, no: st.caseNo.trim(), type: typeFinal, court: st.court.trim(),
+      courtShort: this.courtShort(st.court), judge: '\u2014',
+      stage: 'Filed', stageType: 'pending',
+      prevDate: st.prevDate, nextDate: st.nextDate, receivedDate: st.receivedDate,
+      courtOrder: st.courtOrder.trim(), nextTodo: '', todayTodo: '', fee: st.fee.trim(), notes: st.notes.trim(),
+      oppName: opp[0] ? opp[0].name : '', oppPhone: opp[0] ? opp[0].phone : '', oppLawyers: opp,
+      plaintiff: st.plaintiff, defendant: st.defendant,
+      partiesA, partiesB, appearances: [], files: [],
+      summary: st.notes.trim() || (this.shortName(partiesA[0].name) + ' versus ' + this.shortName(partiesB[0].name) + ' \u2014 ' + typeFinal + ' matter.'),
+      client: { name: mine.name, role: 'Client', phone: mine.phone || '\u2014', address: '\u2014', since: sinceM + ' ' + today.getFullYear() },
+      history: [{ date: this.iso(today), kind: 'filing', title: 'Added to diary', note: 'Case entered into the cause diary.' }],
+    };
+    try {
+      const list = JSON.parse(window.localStorage.getItem(this.NEW_KEY) || '[]');
+      list.push(newCase);
+      window.localStorage.setItem(this.NEW_KEY, JSON.stringify(list));
+    } catch (e) {}
+    this.setState({ saved: true, savedName: newCase.no });
+  };
+
+  addAnother = () => this.setState({
+    caseNo: '', type: 'Civil', otherType: '', court: '',
+    receivedDate: '', prevDate: '', nextDate: '', courtOrder: '', fee: '',
+    notes: '', files: [],
+    plaintiff: { name: '', mine: true, clientNumbers: '', commName: '', commPhones: [''], careName: '', carePhones: [''] },
+    defendant: { name: '', mine: false, clientNumbers: '', commName: '', commPhones: [''], careName: '', carePhones: [''] },
+    oppLawyers: [{ name: '', phone: '', forDefNos: '' }],
+    saved: false, savedName: '', error: '',
+  });
+
+  renderVals() {
+    const st = this.state;
+    const invalidNo = !!st.error && !st.caseNo.trim();
+    const invalidCourt = !!st.error && !st.court.trim();
+    return {
+      caseNo: st.caseNo, onCaseNo: this.set('caseNo'), caseNoStyle: this.inputStyle(invalidNo),
+      type: st.type, onType: this.set('type'), isOther: st.type === 'Other',
+      otherType: st.otherType, onOtherType: this.set('otherType'),
+      court: st.court, onCourt: this.set('court'), courtStyle: this.inputStyle(invalidCourt),
+      receivedDate: st.receivedDate, onReceivedDate: this.set('receivedDate'),
+      prevDate: st.prevDate, onPrevDate: this.set('prevDate'),
+      nextDate: st.nextDate, onNextDate: this.set('nextDate'),
+      courtOrder: st.courtOrder, onCourtOrder: this.set('courtOrder'),
+      fee: st.fee, onFee: this.set('fee'),
+      notes: st.notes, onNotes: this.set('notes'),
+      pf: this.partyVals('plaintiff'), df: this.partyVals('defendant'),
+      oppLawyers: st.oppLawyers.map((o, i) => ({
+        name: o.name, phone: o.phone, forDefNos: o.forDefNos, canRemove: st.oppLawyers.length > 1,
+        onName: (e) => this.setOpp(i, 'name', e.target.value),
+        onPhone: (e) => this.setOpp(i, 'phone', e.target.value),
+        onForDef: (e) => this.setOpp(i, 'forDefNos', e.target.value),
+        onRemove: () => this.removeOpp(i),
+      })),
+      onAddOpp: this.addOpp,
+      files: st.files.map((f, idx) => ({ name: f.name, typeLabel: f.typeLabel, typeStyle: this.fileTypeStyle(f.typeLabel), onRemove: () => this.removeFile(idx) })),
+      onUpload: this.onUpload,
+      hasError: !!st.error, errorText: st.error,
+      onSave: this.save,
+      saved: st.saved, savedName: st.savedName, onAddAnother: this.addAnother,
+      toastOpen: !!st.toast, toastText: st.toast || '',
+      dark: st.dark, lightMode: !st.dark, onToggleTheme: this.toggleTheme,
+    };
+  }
+}
+</script>
+</body>
+</html>
