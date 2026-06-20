@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="scripts/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+  input { font: inherit; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #d9d4cb; border-radius: 8px; }
+  [data-theme="dark"]{ color-scheme:dark;
+    --bg:#0e1116; --surface:#171c25; --brand:#1d3056; --brand-hover:#274072;
+    --ink:#eef2fa; --ink2:#c8d1e0; --muted:#97a3ba; --muted2:#808da4; --faint:#67738a;
+    --line:#262e3b; --fill:#1d2530;
+    --blue-fill:#16243d; --blue-line:#283750; --blue-ink:#93b6f0;
+    --gold-fill:#272113; --gold-line:#4a3f21;
+    --green-fill:#12231a; --green-line:#234134; --green-ink:#7bd6a0;
+    --pink-fill:#2c1c19; --pink-line:#542c24; --red-ink:#f3ad95; }
+  [data-theme="dark"] body{ background:#0e1116; }
+  [data-theme="dark"] ::placeholder{ color:#717d90; opacity:1; }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb{ background:#374050; }
+
+  /* ===== responsive (mobile pass) ===== */
+  @media (max-width: 760px){
+    .ld-pad{ padding:18px 14px 48px !important; }
+    .ld-case{ flex-direction:column !important; }
+    .ld-tile{ width:100% !important; flex-direction:row !important; flex-wrap:wrap; align-items:center !important; justify-content:flex-start !important; column-gap:10px !important; row-gap:2px !important; padding:11px 16px !important; }
+    .ld-cardbody{ padding:14px 16px !important; }
+  }
+</style>
+<script src="scripts/case-data.js"></script>
+</helmet>
+
+<div style="min-height:100vh;background:var(--bg,#fbfaf8);color:var(--ink,#16243f);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased">
+  <div class="ld-pad" style="max-width:1040px;margin:0 auto;padding:30px 28px 60px">
+
+    <!-- top bar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px">
+      <a href="lawyers_diary.dc.html" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--muted,#5b6678);text-decoration:none" style-hover="color:var(--ink,#16243f)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        Back to diary
+      </a>
+      <button onClick="{{ onToggleTheme }}" aria-label="Toggle night mode" style="width:38px;height:38px;border-radius:10px;border:1px solid var(--line,#e2ddd4);background:var(--surface,#fff);color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="border-color:var(--gold-line,#c7a25f)">
+        <sc-if value="{{ lightMode }}" hint-placeholder-val="{{ true }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></sc-if>
+        <sc-if value="{{ dark }}" hint-placeholder-val="{{ false }}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line></svg></sc-if>
+      </button>
+    </div>
+
+    <h1 style="margin:0;font-family:'Source Serif 4',serif;font-weight:600;font-size:28px;line-height:1.1">All cases</h1>
+    <div style="font-size:13.5px;color:var(--muted2,#8a93a3);font-weight:500;margin-top:4px">{{ subtitle }}</div>
+
+    <!-- search -->
+    <div style="position:relative;margin:20px 0 18px">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#aeb4c0" stroke-width="2" stroke-linecap="round" style="position:absolute;left:15px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+      <input value="{{ q }}" onInput="{{ onSearch }}" placeholder="Search by mobile no, case no, party name, court or type…" style="width:100%;padding:14px 16px 14px 44px;border-radius:12px;border:1px solid var(--line,#e2ddd4);background:var(--surface,#fff);font-size:14.5px;color:var(--ink,#16243f);outline:none" style-focus="border-color:var(--gold-line,#c7a25f)" />
+      <sc-if value="{{ hasQ }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onClear }}" aria-label="Clear search" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:8px;color:var(--faint,#9aa2b1);display:flex;align-items:center;justify-content:center" style-hover="background:var(--fill,#f3f5f9)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </sc-if>
+    </div>
+
+    <!-- list -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+        <a class="ld-case" href="{{ r.href }}" style="{{ r.blockStyle }}" style-hover="border-color:var(--gold-line,#c7a25f);box-shadow:0 2px 12px -5px rgba(22,36,63,0.22)">
+          <div class="ld-tile" style="{{ r.tileStyle }}">
+            <div style="{{ r.tileLabelStyle }}">CASE NO.</div>
+            <div style="{{ r.noStyle }}">{{ r.no }}</div>
+            <span style="{{ r.tileDateStyle }}">{{ r.tileDate }}</span>
+          </div>
+          <div class="ld-cardbody" style="flex:1;min-width:0;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+            <div style="min-width:0">
+              <span style="font-size:9.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink2,#42536f);background:var(--blue-fill,#eef1f6);padding:2px 7px;border-radius:5px">{{ r.type }}</span>
+              <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:17px;line-height:1.22;margin-top:7px">{{ r.partyA }} <span style="color:var(--faint,#9aa2b1);font-weight:400;font-size:14px">vs</span> {{ r.partyB }}</div>
+              <div style="font-size:12.5px;color:var(--muted,#5b6678);margin-top:5px">{{ r.courtShort }} · <span style="color:var(--ink2,#3c485e);font-weight:500">{{ r.stage }}</span></div>
+              <div style="display:flex;align-items:center;gap:16px;margin-top:9px;flex-wrap:wrap">
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted,#5b6678);font-weight:500">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#aeb4c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 4-6 8-6s8 2 8 6"></path></svg>
+                  {{ r.client }}
+                </span>
+                <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted,#5b6678);font-family:'IBM Plex Mono',monospace">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1c6b3f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                  {{ r.phone }}
+                </span>
+              </div>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4c9d2" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+        </a>
+      </sc-for>
+      <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:54px 20px;text-align:center;color:var(--faint,#aeb4c0)">
+          <div style="font-family:'Source Serif 4',serif;font-size:18px;color:var(--muted2,#8a93a3)">No matching case</div>
+          <div style="font-size:13.5px;margin-top:6px">Try a different mobile number, case number or party name.</div>
+        </div>
+      </sc-if>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cases: [], q: '', dark: this.loadTheme() };
+  }
+  loadTheme() { try { return window.localStorage.getItem('ld_theme') === 'dark'; } catch (e) { return false; } }
+  componentDidMount() {
+    try { document.documentElement.setAttribute('data-theme', this.state.dark ? 'dark' : 'light'); } catch (e) {}
+    this.loadCases();
+  }
+  loadCases(tries) {
+    tries = tries || 0;
+    if (window.LD_DB && window.LD_DB.getCases) { this.setState({ cases: window.LD_DB.getCases() }); return; }
+    if (tries < 40) { this._t = setTimeout(() => this.loadCases(tries + 1), 50); }
+  }
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  toggleTheme = () => this.setState(s => { const d = !s.dark; try { window.localStorage.setItem('ld_theme', d ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light'); } catch (e) {} return { dark: d }; });
+  onSearch = (e) => this.setState({ q: e.target.value });
+  onClear = () => this.setState({ q: '' });
+
+  TODAY = '2026-06-15';
+  MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  parse(iso) { const p = iso.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); }
+  fmtMed(iso) { if (!iso) return 'No date'; const d = this.parse(iso); return d.getDate() + ' ' + this.MONTHS_S[d.getMonth()] + ' ' + d.getFullYear(); }
+  daysFrom(iso) { if (!iso) return NaN; return Math.round((this.parse(iso) - this.parse(this.TODAY)) / 86400000); }
+  partyLead(arr) { if (!arr || !arr.length) return ''; const first = (arr[0].name || '').split(' (')[0]; return arr.length > 1 ? first + ' & ors.' : first; }
+  myParty(c) { return c.partiesA.concat(c.partiesB).find(p => p.mine) || c.partiesA[0] || { name: '', phone: '' }; }
+
+  renderVals() {
+    const q = this.state.q.trim().toLowerCase();
+    let list = this.state.cases.slice();
+    if (q) list = list.filter(c => {
+      const me = this.myParty(c);
+      const parties = c.partiesA.concat(c.partiesB).map(p => p.name).join(' ');
+      const phones = c.partiesA.concat(c.partiesB).map(p => (p.phone || '')).join(' ');
+      return (c.no + ' ' + c.type + ' ' + parties + ' ' + phones + ' ' + c.court + ' ' + c.summary + ' ' + c.stage + ' ' + (me.phone || '')).toLowerCase().includes(q);
+    });
+    list.sort((a, b) => {
+      if (!a.nextDate && b.nextDate) return -1;
+      if (a.nextDate && !b.nextDate) return 1;
+      return a.nextDate < b.nextDate ? -1 : a.nextDate > b.nextDate ? 1 : 0;
+    });
+    const total = list.length, all = this.state.cases.length;
+
+    const rows = list.map(c => {
+      const me = this.myParty(c);
+      const reminder = !c.nextDate;
+      const isToday = this.daysFrom(c.nextDate) === 0;
+      const tileBg = reminder ? 'var(--pink-fill,#fbece7)' : '#16243f';
+      return {
+        no: c.no, type: c.type,
+        partyA: this.partyLead(c.partiesA), partyB: this.partyLead(c.partiesB),
+        courtShort: c.courtShort, stage: c.stage,
+        client: me.name ? me.name.split(' (')[0] : '\u2014', phone: me.phone || '\u2014',
+        href: 'Lawyers Diary.dc.html?open=' + c.id,
+        blockStyle: { display: 'flex', background: 'var(--surface,#fff)', border: reminder ? '1px solid var(--pink-line,#f1cdc2)' : '1px solid var(--line,#ece9e3)', borderRadius: '14px', overflow: 'hidden', boxShadow: '0 1px 3px rgba(22,36,63,0.05)', textDecoration: 'none', color: 'inherit' },
+        tileStyle: { width: '132px', flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: '16px 14px', gap: '8px', background: tileBg, color: reminder ? 'var(--red-ink,#9a3320)' : '#fff' },
+        tileLabelStyle: { fontSize: '9.5px', fontWeight: 700, letterSpacing: '1px', color: reminder ? '#c08a6f' : '#c7a25f' },
+        noStyle: { fontFamily: "'Source Serif 4',serif", fontWeight: 700, fontSize: '15.5px', lineHeight: 1.18, wordBreak: 'break-word' },
+        tileDate: reminder ? 'No next date' : this.fmtMed(c.nextDate),
+        tileDateStyle: reminder
+          ? { fontSize: '10px', fontWeight: 700, color: 'var(--red-ink,#9a3320)', background: 'var(--surface,#fff)', border: '1px solid var(--pink-line,#f1cdc2)', padding: '2px 8px', borderRadius: '999px', whiteSpace: 'nowrap' }
+          : { fontSize: '10px', fontWeight: 700, color: '#c7a25f', background: isToday ? 'rgba(199,162,95,0.30)' : 'rgba(199,162,95,0.16)', padding: '3px 9px', borderRadius: '999px', whiteSpace: 'nowrap' },
+      };
+    });
+
+    return {
+      subtitle: q ? (total + ' of ' + all + ' matters match \u201c' + this.state.q.trim() + '\u201d') : (all + ' active matters in the diary'),
+      q: this.state.q, onSearch: this.onSearch, hasQ: !!this.state.q, onClear: this.onClear,
+      rows, noResults: total === 0,
+      dark: this.state.dark, lightMode: !this.state.dark, onToggleTheme: this.toggleTheme,
+    };
+  }
+}
+</script>
+</body>
+</html>

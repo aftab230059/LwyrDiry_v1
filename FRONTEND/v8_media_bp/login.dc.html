@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="scripts/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+  input { font: inherit; }
+  @keyframes ldSlide { from { opacity: 0; transform: translateY(-8px); max-height: 0; } to { opacity: 1; transform: none; max-height: 320px; } }
+  @keyframes ldToast { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  /* ===== night mode tokens (light uses inline fallbacks; dark redefines) ===== */
+  [data-theme="dark"]{ color-scheme:dark;
+    --bg:#0e1116; --surface:#171c25; --brand:#1d3056; --brand-hover:#274072;
+    --ink:#eef2fa; --ink2:#c8d1e0; --muted:#97a3ba; --muted2:#808da4; --faint:#67738a;
+    --line:#262e3b; --fill:#1d2530;
+    --blue-fill:#16243d; --blue-line:#283750; --blue-ink:#93b6f0;
+    --gold-fill:#272113; --gold-line:#4a3f21;
+    --green-fill:#12231a; --green-line:#234134; --green-ink:#7bd6a0;
+    --pink-fill:#2c1c19; --pink-line:#542c24; --red-ink:#f3ad95; }
+  [data-theme="dark"] ::placeholder{ color:#717d90; opacity:1; }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb{ background:#374050; border-color:#0e1116; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--brand,#16243f);font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink,#16243f);-webkit-font-smoothing:antialiased">
+
+  <!-- left brand panel -->
+  <div style="flex:1;min-width:0;background:var(--brand,#16243f);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:48px 52px;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 0% 0%, rgba(199,162,95,0.12), transparent 55%);pointer-events:none"></div>
+    <div style="display:flex;align-items:center;gap:13px;position:relative">
+      <div style="width:46px;height:46px;border-radius:12px;background:rgba(199,162,95,0.14);border:1px solid rgba(199,162,95,0.4);display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Source Serif 4',serif;font-weight:700;font-size:19px;color:#c7a25f;letter-spacing:0.5px">LD</span>
+      </div>
+      <div>
+        <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:19px">Lawyers Diary</div>
+        <div style="font-size:11.5px;color:#8fa0bf;font-weight:500;letter-spacing:0.3px;margin-top:1px">ADVOCATE'S CAUSE DIARY</div>
+      </div>
+    </div>
+
+    <div style="position:relative;max-width:440px">
+      <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:34px;line-height:1.25">Every hearing, every client, every date — in one quiet place.</div>
+      <p style="font-size:15px;color:#a7b6d2;line-height:1.65;margin:18px 0 0">Your cause list, next dates and case files — kept ready for court and synced to your phone. Built for the way advocates actually keep their diary.</p>
+    </div>
+
+    <div style="position:relative;display:flex;gap:26px;font-size:12.5px;color:#8fa0bf;font-weight:500">
+      <span>Private &amp; secure</span>
+      <span>Reminders for blank dates</span>
+      <span>WhatsApp client updates</span>
+    </div>
+  </div>
+
+  <!-- right form panel -->
+  <div style="flex:0 0 520px;width:520px;background:var(--bg,#fbfaf8);display:flex;align-items:center;justify-content:center;padding:40px 30px">
+    <div style="width:100%;max-width:360px">
+
+      <div style="margin-bottom:26px">
+        <h1 style="margin:0 0 6px;font-family:'Source Serif 4',serif;font-weight:600;font-size:26px">{{ heading }}</h1>
+        <p style="margin:0;font-size:14px;color:var(--muted2,#8a93a3);line-height:1.5">{{ subheading }}</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+
+        <!-- email -->
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:13px;font-weight:600;color:var(--ink2,#3c485e)">Email address</span>
+          <div style="position:relative">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aeb4c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%)"><rect x="3" y="5" width="18" height="14" rx="2"></rect><polyline points="3 7 12 13 21 7"></polyline></svg>
+            <input value="{{ email }}" onInput="{{ onEmail }}" type="email" placeholder="you@chamber.com" readOnly="{{ locked }}" style="{{ emailStyle }}" />
+          </div>
+        </label>
+
+        <!-- password -->
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:13px;font-weight:600;color:var(--ink2,#3c485e)">Password</span>
+            <span style="font-size:12px;font-weight:600;color:#8a6d3f;cursor:pointer">Forgot?</span>
+          </div>
+          <div style="position:relative">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aeb4c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%)"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <input value="{{ password }}" onInput="{{ onPassword }}" type="{{ pwType }}" placeholder="Your password" readOnly="{{ locked }}" style="{{ pwStyle }}" />
+            <button onClick="{{ onTogglePw }}" aria-label="Show password" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:7px;color:var(--faint,#9aa2b1);display:flex;align-items:center;justify-content:center" style-hover="background:var(--fill,#f3f5f9)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
+        </label>
+
+        <!-- OTP (appears after Next) -->
+        <sc-if value="{{ otpStage }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:9px;padding:16px;background:var(--gold-fill,#f6efe3);border:1px solid var(--gold-line,#ecdcc2);border-radius:13px;overflow:hidden;animation:ldSlide 0.28s cubic-bezier(0.2,0.8,0.2,1)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8a6d3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              <span style="font-size:13px;font-weight:600;color:#6b5a39">Enter the 6-digit code</span>
+            </div>
+            <p style="margin:0;font-size:12.5px;color:#8a7a58;line-height:1.45">We sent a one-time code to <b style="color:#6b5a39">{{ email }}</b>. It arrives by SMS / email in a moment.</p>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <sc-for list="{{ otpBoxes }}" as="b" hint-placeholder-count="6">
+                <input value="{{ b.value }}" onInput="{{ b.onInput }}" onKeyDown="{{ b.onKeyDown }}" data-otp="{{ b.idx }}" maxLength="1" inputMode="numeric" style="{{ b.style }}" />
+              </sc-for>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+              <span style="font-size:12px;color:#8a7a58">Didn't get it?</span>
+              <button onClick="{{ onResend }}" style="font-size:12px;font-weight:600;color:#8a6d3f" style-hover="text-decoration:underline">Resend code</button>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- error -->
+        <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:var(--red-ink,#9a3320);font-weight:600;display:flex;align-items:center;gap:7px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>
+            {{ errorText }}
+          </div>
+        </sc-if>
+
+        <!-- primary action -->
+        <button onClick="{{ onPrimary }}" style="margin-top:4px;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 0;background:var(--brand,#16243f);color:#fff;border-radius:11px;font-size:14.5px;font-weight:600" style-hover="background:var(--brand-hover,#0f1a30)">
+          {{ primaryLabel }}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+
+        <sc-if value="{{ otpStage }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ onBack }}" style="font-size:13px;font-weight:600;color:var(--muted,#5b6678);padding:8px 0" style-hover="color:var(--ink,#16243f)">Use a different email</button>
+        </sc-if>
+      </div>
+
+      <div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--line,#ece9e3);text-align:center;font-size:13px;color:var(--muted2,#8a93a3)">
+        New to Lawyers Diary? <a href="register.dc.html" style="color:#8a6d3f;font-weight:600;text-decoration:none">Create an account</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- toast -->
+  <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:26px;left:50%;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 18px;background:var(--brand,#16243f);color:#fff;border-radius:11px;box-shadow:0 16px 40px -12px rgba(12,18,30,0.5);font-size:13px;font-weight:600;animation:ldToast 0.22s ease">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      {{ toastText }}
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '', password: '', showPw: false,
+      stage: 'creds', otp: ['', '', '', '', '', ''],
+      error: '', toast: null,
+    };
+  }
+  componentWillUnmount() { clearTimeout(this._toastT); clearTimeout(this._navT); }
+  showToast(msg) { clearTimeout(this._toastT); this.setState({ toast: msg }); this._toastT = setTimeout(() => this.setState({ toast: null }), 2000); }
+
+  onEmail = (e) => this.setState({ email: e.target.value, error: '' });
+  onPassword = (e) => this.setState({ password: e.target.value, error: '' });
+  onTogglePw = () => this.setState(s => ({ showPw: !s.showPw }));
+
+  validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()); }
+
+  toOtp = () => {
+    if (!this.validEmail(this.state.email)) { this.setState({ error: 'Please enter a valid email address.' }); return; }
+    if (this.state.password.length < 4) { this.setState({ error: 'Please enter your password.' }); return; }
+    this.setState({ stage: 'otp', error: '' });
+    this.showToast('Verification code sent');
+    setTimeout(() => { const el = document.querySelector('[data-otp="0"]'); if (el) el.focus(); }, 80);
+  };
+
+  onOtp = (idx, value) => {
+    const v = value.replace(/[^0-9]/g, '').slice(-1);
+    this.setState(s => {
+      const otp = s.otp.slice(); otp[idx] = v; return { otp, error: '' };
+    });
+    if (v && idx < 5) { const el = document.querySelector('[data-otp="' + (idx + 1) + '"]'); if (el) el.focus(); }
+  };
+  onOtpKey = (idx, e) => {
+    if (e.key === 'Backspace' && !this.state.otp[idx] && idx > 0) {
+      const el = document.querySelector('[data-otp="' + (idx - 1) + '"]'); if (el) el.focus();
+    }
+  };
+
+  verify = () => {
+    const code = this.state.otp.join('');
+    if (code.length < 6) { this.setState({ error: 'Enter all 6 digits of the code.' }); return; }
+    this.showToast('Signed in \u2014 opening your diary');
+    clearTimeout(this._navT);
+    this._navT = setTimeout(() => { window.location.href = 'Lawyers Diary.dc.html'; }, 900);
+  };
+
+  resend = () => { this.setState({ otp: ['', '', '', '', '', ''] }); this.showToast('New code sent'); const el = document.querySelector('[data-otp="0"]'); if (el) el.focus(); };
+  back = () => this.setState({ stage: 'creds', otp: ['', '', '', '', '', ''], error: '' });
+
+  credInputStyle(locked) {
+    return { width: '100%', padding: '13px 14px 13px 40px', border: '1px solid var(--line,#e2ddd4)', borderRadius: '11px', background: locked ? 'var(--bg,#f3f1ec)' : 'var(--surface,#fff)', fontSize: '14.5px', color: locked ? 'var(--muted2,#8a93a3)' : 'var(--ink,#16243f)', outline: 'none' };
+  }
+  otpBoxStyle(filled) {
+    return { width: '100%', height: '52px', textAlign: 'center', border: '1px solid ' + (filled ? '#b08d57' : '#dcc9a6'), borderRadius: '10px', background: 'var(--surface,#fff)', fontSize: '21px', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", color: 'var(--ink,#16243f)', outline: 'none' };
+  }
+
+  renderVals() {
+    const otpStage = this.state.stage === 'otp';
+    return {
+      heading: otpStage ? 'Verify it\u2019s you' : 'Sign in to your diary',
+      subheading: otpStage ? 'One more step to keep your case files private.' : 'Welcome back, advocate. Enter your details to continue.',
+      email: this.state.email, onEmail: this.onEmail, locked: otpStage,
+      emailStyle: this.credInputStyle(otpStage),
+      password: this.state.password, onPassword: this.onPassword, pwType: this.state.showPw ? 'text' : 'password',
+      pwStyle: { ...this.credInputStyle(otpStage), paddingRight: '44px' },
+      onTogglePw: this.onTogglePw,
+      otpStage,
+      otpBoxes: this.state.otp.map((v, idx) => ({
+        idx, value: v, style: this.otpBoxStyle(!!v),
+        onInput: (e) => this.onOtp(idx, e.target.value),
+        onKeyDown: (e) => this.onOtpKey(idx, e),
+      })),
+      onResend: this.resend, onBack: this.back,
+      hasError: !!this.state.error, errorText: this.state.error,
+      onPrimary: otpStage ? this.verify : this.toOtp,
+      primaryLabel: otpStage ? 'Verify & sign in' : 'Next',
+      toastOpen: !!this.state.toast, toastText: this.state.toast || '',
+    };
+  }
+}
+</script>
+</body>
+</html>

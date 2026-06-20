@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="scripts/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+  input, textarea, select { font: inherit; }
+  textarea { resize: vertical; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #d9d4cb; border-radius: 8px; border: 2px solid var(--bg,#fbfaf8); }
+  ::-webkit-scrollbar-thumb:hover { background: #c4bdb0; }
+  @keyframes ldFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ldPop { from { opacity: 0; transform: translateY(12px) scale(0.985); } to { opacity: 1; transform: none; } }
+  @keyframes ldPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(192,73,47,0.55); } 50% { box-shadow: 0 0 0 5px rgba(192,73,47,0); } }
+  @keyframes ldToast { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+  /* ===== night mode tokens (light uses inline fallbacks; dark redefines) ===== */
+  [data-theme="dark"]{ color-scheme:dark;
+    --bg:#0e1116; --surface:#171c25; --brand:#1d3056; --brand-hover:#274072;
+    --ink:#eef2fa; --ink2:#c8d1e0; --muted:#97a3ba; --muted2:#808da4; --faint:#67738a;
+    --line:#262e3b; --fill:#1d2530;
+    --blue-fill:#16243d; --blue-line:#283750; --blue-ink:#93b6f0;
+    --gold-fill:#272113; --gold-line:#4a3f21;
+    --green-fill:#12231a; --green-line:#234134; --green-ink:#7bd6a0;
+    --pink-fill:#2c1c19; --pink-line:#542c24; --red-ink:#f3ad95; }
+  [data-theme="dark"] body{ background:#0e1116; }
+  [data-theme="dark"] ::placeholder{ color:#717d90; opacity:1; }
+  [data-theme="dark"] ::-webkit-scrollbar-thumb{ background:#374050; border-color:#0e1116; }
+
+  /* ===== responsive (mobile pass) ===== */
+  @media (max-width: 880px){
+    .ld-shell{ flex-direction:column !important; height:auto !important; min-height:100vh; overflow:visible !important; }
+    .ld-aside{ width:100% !important; flex:none !important; border-right:none !important; border-bottom:1px solid var(--line,#ece9e3) !important; overflow:visible !important; }
+    .ld-main{ overflow:visible !important; }
+    .ld-scroll{ overflow:visible !important; }
+    .ld-case{ flex-direction:column !important; }
+    .ld-tile{ width:100% !important; flex-direction:row !important; flex-wrap:wrap; align-items:center !important; justify-content:flex-start !important; column-gap:10px !important; row-gap:2px !important; padding:11px 16px !important; }
+    .ld-2col{ grid-template-columns:1fr !important; }
+    .ld-htools{ flex:1 1 100% !important; }
+    .ld-searchwrap{ flex:1 1 100% !important; }
+    .ld-search{ width:100% !important; }
+  }
+  @media (max-width: 560px){
+    .ld-scroll{ padding-left:14px !important; padding-right:14px !important; }
+  }
+</style>
+</helmet>
+
+<div class="ld-shell" style="display:flex;height:100vh;width:100%;overflow:hidden;background:var(--bg,#fbfaf8);color:var(--ink,#16243f);font-family:'Hanken Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="ld-aside" style="flex:0 0 340px;width:340px;background:var(--surface,#ffffff);border-right:1px solid var(--line,#ece9e3);display:flex;flex-direction:column;overflow:hidden">
+
+    <a href="register.dc.html" title="Your profile" style="padding:20px 22px 16px;border-bottom:1px solid var(--line,#f1eee8);display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit">
+      <div style="width:42px;height:42px;border-radius:12px;background:var(--brand,#16243f);display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:hidden">
+        <sc-if value="{{ hasUserPhoto }}" hint-placeholder-val="{{ false }}"><div style="{{ avatarPhotoStyle }}"></div></sc-if>
+        <sc-if value="{{ noUserPhoto }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Source Serif 4',serif;font-weight:700;font-size:16px;color:#c7a25f;letter-spacing:0.5px">{{ userInitials }}</span></sc-if>
+      </div>
+      <div style="min-width:0">
+        <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:18px;line-height:1.1">{{ diaryTitle }}</div>
+        <div style="font-size:11.5px;color:var(--muted2,#8a93a3);font-weight:500;letter-spacing:0.3px;margin-top:2px">ADVOCATE'S CAUSE DIARY</div>
+      </div>
+    </a>
+
+    <div class="ld-scroll" style="flex:1;overflow-y:auto;padding:18px 20px 24px">
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:6px;min-width:0">
+          <select value="{{ calMonthStr }}" onChange="{{ onMonthSelect }}" aria-label="Select month" style="font-family:'Source Serif 4',serif;font-weight:600;font-size:15px;color:var(--ink,#16243f);background:var(--surface,#fff);border:1px solid var(--line,#ece9e3);border-radius:8px;padding:5px 7px;cursor:pointer;outline:none;max-width:118px">
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+          </select>
+          <select value="{{ calYearStr }}" onChange="{{ onYearSelect }}" aria-label="Select year" style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;color:var(--ink,#16243f);background:var(--surface,#fff);border:1px solid var(--line,#ece9e3);border-radius:8px;padding:5px 7px;cursor:pointer;outline:none">
+            <option value="2018">2018</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+            <option value="2030">2030</option>
+            <option value="2031">2031</option>
+            <option value="2032">2032</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:4px">
+          <button onClick="{{ onPrevMonth }}" aria-label="Previous month" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--line,#ece9e3);display:flex;align-items:center;justify-content:center;color:var(--muted,#5b6678)" style-hover="background:var(--fill,#f3f5f9)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button onClick="{{ onNextMonth }}" aria-label="Next month" style="width:28px;height:28px;border-radius:8px;border:1px solid var(--line,#ece9e3);display:flex;align-items:center;justify-content:center;color:var(--muted,#5b6678)" style-hover="background:var(--fill,#f3f5f9)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px">
+        <span style="text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:var(--faint,#aeb4c0);padding:2px 0">SU</span>
+        <span style="text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:var(--faint,#aeb4c0);padding:2px 0">MO</span>
+        <span style="text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:var(--faint,#aeb4c0);padding:2px 0">TU</span>
+        <span style="text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:var(--faint,#aeb4c0);padding:2px 0">WE</span>
+        <span style="text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:var(--faint,#aeb4c0);padding:2px 0">TH</span>
+        <span style="text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:#c2a06a;padding:2px 0">FR</span>
+        <span style="text-align:center;font-size:10.5px;font-weight:700;letter-spacing:0.4px;color:#c2a06a;padding:2px 0">SA</span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <sc-for list="{{ weeks }}" as="week" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">
+            <sc-for list="{{ week }}" as="d" hint-placeholder-count="7">
+              <button onClick="{{ d.onClick }}" title="{{ d.title }}" style="{{ d.cellStyle }}" style-hover="filter:brightness(0.96)">
+                <span style="{{ d.numStyle }}">{{ d.day }}</span>
+                <sc-if value="{{ d.showBadge }}" hint-placeholder-val="{{ false }}">
+                  <span style="{{ d.badgeStyle }}">{{ d.count }}</span>
+                </sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line,#f1eee8)">
+        <div style="display:flex;flex-direction:column;gap:1px;min-width:0">
+          <span style="font-size:9px;font-weight:700;letter-spacing:0.6px;color:var(--faint,#aeb4c0)">BENGALI DATE · বঙ্গাব্দ</span>
+          <span style="font-size:13.5px;font-weight:600;color:var(--ink2,#42536f);line-height:1.2">{{ bengaliDate }}</span>
+        </div>
+        <button onClick="{{ onToday }}" style="font-size:12px;font-weight:600;color:#8a6d3f;padding:4px 10px;border-radius:7px;flex:0 0 auto" style-hover="background:var(--gold-fill,#f6efe3)">Today</button>
+      </div>
+
+      <div style="margin-top:22px;display:flex;flex-direction:column;gap:9px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.7px;color:var(--faint,#9aa2b1)">AT A GLANCE</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--brand,#16243f);border-radius:11px;color:#fff">
+          <div>
+            <div style="font-size:12px;color:#9fb0cf;font-weight:500">Today's hearings</div>
+            <div style="font-size:11px;color:#6f80a0;margin-top:1px">{{ todayDateLabel }}</div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;color:#c7a25f">{{ todayCount }}</div>
+        </div>
+        <div style="display:flex;gap:9px">
+          <sc-if value="{{ showReminderStat }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ onToggleNoDate }}" title="Show matters that need a next date" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;padding:11px 13px;background:var(--pink-fill,#fbece7);border:1px solid var(--pink-line,#f1cdc2);border-radius:11px;text-align:left" style-hover="background:var(--pink-fill,#f9e2da)">
+              <div style="display:flex;align-items:center;gap:7px">
+                <span style="width:8px;height:8px;border-radius:50%;background:#c0492f;flex:0 0 auto;animation:ldPulse 1.8s ease infinite"></span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:#c0492f">{{ reminderCount }}</span>
+              </div>
+              <div style="font-size:11px;color:var(--red-ink,#9a3320);font-weight:600;line-height:1.3">{{ reminderLabelText }}</div>
+            </button>
+          </sc-if>
+          <sc-if value="{{ noReminders }}" hint-placeholder-val="{{ false }}">
+            <div style="flex:1;min-width:0;padding:11px 13px;background:var(--green-fill,#eef6f0);border:1px solid var(--green-line,#cfe6d6);border-radius:11px">
+              <div style="font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600;color:#2f7a5f">0</div>
+              <div style="font-size:11px;color:#2f7a5f;font-weight:600;line-height:1.3;margin-top:1px">all matters scheduled</div>
+            </div>
+          </sc-if>
+          <a href="all_cases.dc.html" title="Open the full case list" style="flex:1;padding:11px 13px;background:var(--fill,#f6f5f1);border:1px solid var(--line,#ece9e3);border-radius:11px;text-decoration:none;color:inherit;display:block" style-hover="border-color:var(--gold-line,#c7a25f);background:var(--gold-fill,#f6efe3)">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:21px;font-weight:600">{{ activeCount }}</div>
+            <div style="font-size:11.5px;color:var(--muted2,#8a93a3);font-weight:500;margin-top:1px;display:flex;align-items:center;gap:4px">active matters <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8a6d3f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- PERSONAL REMINDERS -->
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line,#f1eee8);display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:9px;min-width:0">
+          <span style="width:26px;height:26px;border-radius:8px;background:var(--gold-fill,#f6efe3);border:1px solid var(--gold-line,#e9d9bd);display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#8a6d3f">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          </span>
+          <div style="min-width:0">
+            <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:14px;line-height:1.1">Personal reminders</div>
+            <div style="font-size:11px;color:var(--muted2,#8a93a3);font-weight:500;margin-top:1px">{{ todoDateLabel }}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <input value="{{ todoDraft }}" onInput="{{ onTodoDraft }}" onKeyDown="{{ onTodoKey }}" placeholder="Add a reminder…" style="flex:1;min-width:0;padding:8px 11px;border:1px solid var(--line,#e2ddd4);border-radius:9px;background:var(--surface,#fff);font-size:13px;color:var(--ink,#16243f);outline:none" />
+          <button onClick="{{ onAddTodo }}" aria-label="Add reminder" style="width:36px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;background:#8a6d3f;border-radius:9px" style-hover="background:#755c33">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <sc-for list="{{ todoItems }}" as="t" hint-placeholder-count="0">
+            <div style="display:flex;align-items:center;gap:8px">
+              <button onClick="{{ t.onToggle }}" aria-label="Toggle done" style="{{ t.boxStyle }}">
+                <sc-if value="{{ t.done }}" hint-placeholder-val="{{ false }}">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </sc-if>
+              </button>
+              <input value="{{ t.text }}" onInput="{{ t.onText }}" style="{{ t.textStyle }}" />
+              <button onClick="{{ t.onDelete }}" aria-label="Delete reminder" style="width:26px;height:26px;border-radius:7px;color:#b9947d;display:flex;align-items:center;justify-content:center;flex:0 0 auto" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noTodos }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:11.5px;color:var(--faint,#aeb4c0);font-weight:500;padding:2px 2px;line-height:1.4">No reminders for this day. Pick any date on the calendar to add your own to-dos.</div>
+          </sc-if>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="ld-main" style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0">
+
+    <header style="flex:0 0 auto;padding:16px 24px;border-bottom:1px solid var(--line,#ece9e3);background:var(--bg,#fbfaf8);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+      <div style="min-width:200px;flex:1 1 auto">
+        <h1 style="margin:0;font-family:'Source Serif 4',serif;font-weight:600;font-size:20px;line-height:1.15;text-wrap:balance">{{ contextTitle }}</h1>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+          <span style="font-size:13px;color:var(--muted2,#8a93a3);font-weight:500">{{ contextSub }}</span>
+        </div>
+      </div>
+      <div class="ld-htools" style="display:flex;align-items:center;gap:8px;flex:0 0 auto;flex-wrap:wrap">
+        <button onClick="{{ onToggleTheme }}" aria-label="Toggle night mode" title="Toggle night mode" style="width:40px;height:40px;flex:0 0 auto;border-radius:10px;border:1px solid var(--line,#e2ddd4);background:var(--surface,#fff);color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="color:var(--ink,#16243f);border-color:var(--gold-line,#c7a25f)">
+          <sc-if value="{{ lightMode }}" hint-placeholder-val="{{ true }}">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          </sc-if>
+          <sc-if value="{{ dark }}" hint-placeholder-val="{{ false }}">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line><line x1="4.9" y1="4.9" x2="7" y2="7"></line><line x1="17" y1="17" x2="19.1" y2="19.1"></line><line x1="4.9" y1="19.1" x2="7" y2="17"></line><line x1="17" y1="7" x2="19.1" y2="4.9"></line></svg>
+          </sc-if>
+        </button>
+        <div class="ld-searchwrap" style="position:relative">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#aeb4c0" stroke-width="2" stroke-linecap="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.5" y2="16.5"></line></svg>
+          <input class="ld-search" value="{{ search }}" onInput="{{ onSearch }}" placeholder="Search case no, party, court…" style="width:240px;padding:10px 14px 10px 38px;border-radius:10px;border:1px solid var(--line,#e2ddd4);background:var(--surface,#fff);font-size:13.5px;color:var(--ink,#16243f);outline:none" />
+        </div>
+        <a href="day_summary.dc.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 14px;background:var(--surface,#fff);color:var(--ink,#16243f);border:1px solid var(--line,#e2ddd4);border-radius:10px;font-size:13.5px;font-weight:600;text-decoration:none;white-space:nowrap" style-hover="background:var(--fill,#f3f5f9)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8a6d3f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>
+          Day summary
+        </a>
+        <a href="create_case.dc.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 16px;background:var(--brand,#16243f);color:#fff;border-radius:10px;font-size:13.5px;font-weight:600;text-decoration:none;white-space:nowrap" style-hover="background:var(--brand-hover,#0f1a30)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          New case
+        </a>
+      </div>
+    </header>
+
+    <div class="ld-scroll" style="flex:1;overflow-y:auto;padding:22px 28px 48px">
+
+      <sc-if value="{{ showReminderBanner }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--pink-fill,#fbece7);border:1px solid var(--pink-line,#f1cdc2);border-radius:13px;margin-bottom:14px">
+          <span style="width:30px;height:30px;border-radius:9px;background:var(--surface,#fff);border:1px solid var(--pink-line,#f1cdc2);display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#c0492f">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9a2 2 0 0 1 3.4 0l8 14A2 2 0 0 1 20 21H4a2 2 0 0 1-1.7-3.1z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12" y2="17"></line></svg>
+          </span>
+          <div style="flex:1;min-width:0;font-size:13px;color:var(--red-ink,#9a3320);font-weight:600;line-height:1.4">{{ reminderBannerText }}</div>
+          <a href="pending_dates.dc.html" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--red-ink,#9a3320);background:var(--surface,#fff);border:1px solid var(--pink-line,#f1cdc2);padding:8px 13px;border-radius:9px;white-space:nowrap;text-decoration:none" style-hover="background:var(--pink-fill,#fdf3f0)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print list
+          </a>
+          <button onClick="{{ onToggleNoDate }}" style="flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#fff;background:#c0492f;padding:8px 14px;border-radius:9px;white-space:nowrap" style-hover="background:#a83c25">
+            {{ reminderBtnLabel }}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;flex-direction:column;gap:13px">
+        <sc-for list="{{ cases }}" as="c" hint-placeholder-count="6">
+          <div class="ld-case" style="{{ c.blockStyle }}">
+
+            <!-- ===== CASE-NO TILE ===== -->
+            <div class="ld-tile" style="{{ c.tileStyle }}">
+              <div style="{{ c.tileNoLabelStyle }}">{{ c.tileNoLabel }}</div>
+              <div style="{{ c.tileNoStyle }}">{{ c.tileNo }}</div>
+            </div>
+
+            <!-- ===== CONTENT ===== -->
+            <div style="flex:1;min-width:0;padding:16px 20px;display:flex;flex-direction:column;gap:11px">
+
+              <!-- header row -->
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                <div style="min-width:0;flex:1">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink2,#42536f);background:var(--blue-fill,#eef1f6);padding:2px 7px;border-radius:5px">{{ c.type }}</span>
+                    <sc-if value="{{ c.needsReminder }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;color:var(--red-ink,#9a3320);background:var(--pink-fill,#fbece7);padding:2px 8px;border-radius:999px">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#c0492f;animation:ldPulse 1.8s ease infinite"></span>Reminder
+                      </span>
+                    </sc-if>
+                  </div>
+                  <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:19px;line-height:1.22;margin-top:6px">{{ c.partyA }} <span style="color:var(--faint,#9aa2b1);font-weight:400;font-size:16px">vs</span> {{ c.partyB }}</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto">
+                  <button onClick="{{ c.onSunani }}" title="Mark this as a hearing day (Sunani)" style="{{ c.sunaniStyle }}">Sunani</button>
+                  <button onClick="{{ c.onTodbir }}" title="Mark this as a follow-up / representation (Todbir)" style="{{ c.todbirStyle }}">Todbir</button>
+                  <button onClick="{{ c.onToggleExpand }}" title="Edit / more details" aria-label="Edit / more details" style="{{ c.chevStyle }}" style-hover="background:var(--fill,#f3f5f9)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="{{ c.chevIconStyle }}"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <button onClick="{{ c.onExpand }}" title="Open case file (history &amp; client)" aria-label="Open case file" style="width:34px;height:34px;border-radius:9px;border:1px solid var(--line,#e2ddd4);color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="background:var(--brand,#16243f);color:#fff;border-color:var(--ink,#16243f)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- court · stage · next date -->
+              <div style="font-size:13.5px;color:var(--muted,#5b6678);line-height:1.4">{{ c.courtShort }} · <span style="color:var(--ink,#16243f);font-weight:500">{{ c.stage }}</span><sc-if value="{{ c.hasNextDate }}" hint-placeholder-val="{{ false }}"> · <span style="color:#8a6d3f;font-weight:600">Next {{ c.nextShort }}</span></sc-if></div>
+
+              <!-- court order + DO side by side -->
+              <div style="display:flex;gap:11px;align-items:stretch">
+                <sc-if value="{{ c.hasCourtOrder }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:1 1 0;min-width:0;display:flex;gap:10px;align-items:flex-start;padding:11px 14px;background:#16243f;border-radius:10px">
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.5px;color:#c7a25f;flex:0 0 auto;padding-top:2px">COURT</span>
+                    <span style="font-size:13.5px;color:#dde4f0;font-weight:500;line-height:1.45">{{ c.courtOrder }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ c.hasTodayTodo }}" hint-placeholder-val="{{ false }}">
+                  <div style="flex:1 1 0;min-width:0;display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:var(--fill,#f8f6f1);border-radius:10px">
+                    <span style="font-size:10px;font-weight:700;letter-spacing:0.5px;color:#8a6d3f;flex:0 0 auto;padding-top:9px">DO</span>
+                    <textarea value="{{ c.todayTodo }}" onChange="{{ c.onTodayTodo }}" rows="1" placeholder="What I must do for this matter…" style="flex:1;min-width:0;font-size:13.5px;color:var(--ink2,#3c485e);font-weight:500;line-height:1.45;background:transparent;border:1px solid transparent;border-radius:8px;outline:none;resize:vertical;padding:6px 8px;font-family:inherit;min-height:32px" style-hover="background:var(--surface,#fff);border-color:var(--line,#e2ddd4)" style-focus="background:var(--surface,#fff);border-color:var(--gold-line,#e9d9bd)"></textarea>
+                  </div>
+                </sc-if>
+              </div>
+
+              <!-- reminder prompt -->
+              <sc-if value="{{ c.needsReminder }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:var(--pink-fill,#fbece7);border:1px solid var(--pink-line,#f1cdc2);border-radius:10px">
+                  <span style="font-size:12.5px;color:var(--red-ink,#9a3320);font-weight:600;line-height:1.4">{{ c.reminderLine }}</span>
+                  <button onClick="{{ c.onToggleExpand }}" style="font-size:12px;font-weight:600;color:#fff;background:#c0492f;padding:7px 13px;border-radius:8px;flex:0 0 auto;white-space:nowrap" style-hover="background:#a83c25">Set next date</button>
+                </div>
+              </sc-if>
+
+              <!-- ============ EXPANDED EDIT PANEL ============ -->
+              <sc-if value="{{ c.isExpanded }}" hint-placeholder-val="{{ false }}">
+                <div style="border-top:1px dashed #e3ddd2;margin-top:5px;padding-top:16px;display:flex;flex-direction:column;gap:18px">
+
+                  <!-- scheduling -->
+                  <div>
+                    <div style="font-size:10.5px;font-weight:700;letter-spacing:0.6px;color:#8a6d3f;margin-bottom:10px">SCHEDULING</div>
+                    <!-- compact one-row: previous date · today's fee · forward to next date -->
+                    <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;padding:11px 12px;background:var(--gold-fill,#f6efe3);border:1px solid var(--gold-line,#e9d9bd);border-radius:11px">
+                      <div style="display:flex;flex-direction:column;gap:5px;flex:0 0 auto">
+                        <span style="font-size:10px;font-weight:700;letter-spacing:0.4px;color:var(--muted,#5b6678)">PREV. DATE</span>
+                        <div style="padding:7px 10px;border:1px solid var(--line,#efeae2);border-radius:8px;background:var(--surface,#fff);font-size:12.5px;color:var(--muted,#5b6678);font-family:'IBM Plex Mono',monospace;white-space:nowrap">{{ c.prevLabel }}</div>
+                      </div>
+                      <label style="display:flex;flex-direction:column;gap:5px;flex:0 0 auto">
+                        <span style="font-size:10px;font-weight:700;letter-spacing:0.4px;color:var(--green-ink,#1c6b3f)">TODAY'S FEE ৳</span>
+                        <input type="text" value="{{ c.fee }}" onChange="{{ c.onFee }}" placeholder="5,000" style="width:92px;padding:7px 10px;border:1px solid var(--green-line,#cfe6d6);border-radius:8px;background:var(--surface,#fff);font-size:12.5px;color:var(--ink,#16243f);outline:none;font-family:'IBM Plex Mono',monospace" />
+                      </label>
+                      <label style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:140px">
+                        <span style="font-size:10px;font-weight:700;letter-spacing:0.4px;color:#8a6d3f">FORWARD TO NEXT DATE</span>
+                        <input type="date" value="{{ c.fwdDateVal }}" onChange="{{ c.onFwdDate }}" style="padding:6px 10px;border:1px solid var(--gold-line,#e0cfa6);border-radius:8px;background:var(--surface,#fff);font-size:12.5px;color:var(--ink,#16243f);outline:none;width:100%" />
+                      </label>
+                      <button onClick="{{ c.onForward }}" title="Moves the matter to the new date. Today's entry stays on record on the old date." style="display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#fff;background:#8a6d3f;padding:8px 14px;border-radius:8px;white-space:nowrap;flex:0 0 auto" style-hover="background:#755c33">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        Forward
+                      </button>
+                    </div>
+                    <!-- court order + special notes side by side -->
+                    <div class="ld-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+                      <label style="display:flex;flex-direction:column;gap:6px">
+                        <span style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:#8a6d3f"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V8l7-4 7 4v13"></path></svg>Court's order / proceeding <span style="font-weight:500;color:var(--faint,#aeb4c0)">· court record</span></span>
+                        <textarea value="{{ c.courtOrderVal }}" onChange="{{ c.onCourtOrder }}" rows="2" placeholder="e.g. Fixed for examination of PW-2; bring measurement map" style="padding:9px 11px;border:1px solid #233453;border-radius:9px;background:#16243f;font-size:13px;color:#eaf0fb;outline:none;width:100%;line-height:1.45;min-height:62px;resize:vertical"></textarea>
+                      </label>
+                      <label style="display:flex;flex-direction:column;gap:6px">
+                        <span style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--muted,#5b6678)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="7" y1="9" x2="17" y2="9"></line><line x1="7" y1="13" x2="14" y2="13"></line></svg>Special notes <span style="font-weight:500;color:var(--faint,#aeb4c0)">· private</span></span>
+                        <textarea value="{{ c.notes }}" onChange="{{ c.onNotes }}" rows="2" placeholder="Private notes for this matter…" style="padding:8px 10px;border:1px solid var(--line,#e2ddd4);border-radius:9px;background:var(--fill,#faf8f4);font-size:13px;color:var(--ink,#16243f);outline:none;width:100%;line-height:1.45;min-height:62px;resize:vertical"></textarea>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- intake & contacts (carried from New Case) -->
+                  <div>
+                    <div style="font-size:10.5px;font-weight:700;letter-spacing:0.6px;color:#8a6d3f;margin-bottom:10px">INTAKE &amp; CONTACTS</div>
+                    <div style="display:flex;flex-wrap:wrap;gap:10px">
+                      <label style="display:flex;flex-direction:column;gap:5px;flex:0 0 auto">
+                        <span style="font-size:11px;font-weight:700;color:var(--muted,#5b6678)">Date I received the file</span>
+                        <input type="date" value="{{ c.receivedDateVal }}" onChange="{{ c.onReceivedDate }}" style="padding:8px 10px;border:1px solid var(--line,#e2ddd4);border-radius:9px;background:var(--surface,#fff);font-size:12.5px;color:var(--ink,#16243f);outline:none" />
+                      </label>
+                      <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px">
+                        <span style="font-size:11px;font-weight:700;color:var(--muted,#5b6678)">Communication person <span style="font-weight:500;color:var(--faint,#aeb4c0)">· from case file</span></span>
+                        <div style="display:flex;gap:6px">
+                          <div title="Set when the case was created" style="flex:1.3;min-width:0;padding:8px 10px;border:1px solid var(--line,#efeae2);border-radius:9px;background:var(--fill,#f6f5f1);font-size:12.5px;color:var(--ink2,#42536f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.commNameDisp }}</div>
+                          <div style="flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line,#efeae2);border-radius:9px;background:var(--fill,#f6f5f1);font-size:12.5px;color:var(--ink2,#42536f);font-family:'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.commPhoneDisp }}</div>
+                        </div>
+                      </div>
+                      <div style="display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px">
+                        <span style="font-size:11px;font-weight:700;color:var(--muted,#5b6678)">Care-of (c/o) person <span style="font-weight:500;color:var(--faint,#aeb4c0)">· from case file</span></span>
+                        <div style="display:flex;gap:6px">
+                          <div title="Set when the case was created" style="flex:1.3;min-width:0;padding:8px 10px;border:1px solid var(--line,#efeae2);border-radius:9px;background:var(--fill,#f6f5f1);font-size:12.5px;color:var(--ink2,#42536f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.careNameDisp }}</div>
+                          <div style="flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line,#efeae2);border-radius:9px;background:var(--fill,#f6f5f1);font-size:12.5px;color:var(--ink2,#42536f);font-family:'IBM Plex Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.carePhoneDisp }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- clients + opposition -->
+                  <div class="ld-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div>
+                      <div style="font-size:10.5px;font-weight:700;letter-spacing:0.6px;color:#8a6d3f;margin-bottom:10px">MY CLIENT(S)</div>
+                      <div style="display:flex;flex-direction:column;gap:7px">
+                        <sc-for list="{{ c.clientList }}" as="cl" hint-placeholder-count="1">
+                          <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:var(--fill,#faf8f4);border:1px solid var(--line,#efeae2);border-radius:10px">
+                            <span style="{{ cl.sideStyle }}">{{ cl.sideLabel }}</span>
+                            <div style="min-width:0;flex:1;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cl.name }}</div>
+                            <a href="{{ cl.telHref }}" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted,#5b6678);font-family:'IBM Plex Mono',monospace;text-decoration:none;white-space:nowrap;flex:0 0 auto" style-hover="color:var(--ink,#16243f)">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1c6b3f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                              {{ cl.phone }}
+                            </a>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="font-size:10.5px;font-weight:700;letter-spacing:0.6px;color:var(--ink2,#42536f);margin-bottom:10px">OPPOSITION LAWYER</div>
+                      <div style="background:#16243f;border:1px solid #233453;border-radius:11px;padding:11px 12px;display:flex;flex-direction:column;gap:9px">
+                        <div style="display:flex;gap:7px">
+                          <input type="text" value="{{ c.oppName }}" onChange="{{ c.onOppName }}" placeholder="Lawyer's name" style="flex:1.5;min-width:0;padding:9px 11px;border:1px solid rgba(255,255,255,0.16);border-radius:9px;background:rgba(255,255,255,0.06);font-size:13px;color:#eef2fa;outline:none" />
+                          <div style="flex:1.2;min-width:0;display:flex;align-items:center;border:1px solid rgba(255,255,255,0.16);border-radius:9px;background:rgba(255,255,255,0.06);overflow:hidden">
+                            <span style="padding:9px 0 9px 10px;color:#c7a25f;display:flex;flex:0 0 auto"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></span>
+                            <input type="text" value="{{ c.oppPhone }}" onChange="{{ c.onOppPhone }}" placeholder="Contact number" style="flex:1;min-width:0;padding:9px 10px;border:none;background:transparent;font-size:13px;color:#eef2fa;outline:none;font-family:'IBM Plex Mono',monospace" />
+                          </div>
+                        </div>
+                        <input type="text" value="{{ c.oppForDef }}" onChange="{{ c.onOppForDef }}" placeholder="Appears for defendant no(s). e.g. 1, 2" style="width:100%;padding:8px 11px;border:1px solid rgba(255,255,255,0.16);border-radius:9px;background:rgba(255,255,255,0.06);font-size:12.5px;color:#eef2fa;outline:none;font-family:'IBM Plex Mono',monospace" />
+                        <sc-if value="{{ c.hasOppRep }}" hint-placeholder-val="{{ false }}">
+                          <div style="display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#9fb0cf">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+                            Appears for {{ c.oppRepLabel }}
+                          </div>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- WHATSAPP + FILES side by side -->
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:start">
+                  <!-- WHATSAPP CLIENT UPDATE -->
+                  <div style="background:var(--green-fill,#f1f7f2);border:1px solid var(--green-line,#cfe6d6);border-radius:12px;padding:14px 15px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px">
+                      <div style="display:flex;align-items:center;gap:8px">
+                        <span style="width:24px;height:24px;border-radius:7px;background:#1f9d55;display:flex;align-items:center;justify-content:center;flex:0 0 auto">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.8.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-5.9c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.5.1-.6.8-.7.9-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7.3 7.3 0 0 1-1.3-1.7c-.2-.3 0-.4.1-.6l.4-.4.2-.4a.4.4 0 0 0 0-.4l-.7-1.8c-.2-.5-.4-.4-.5-.4h-.5a.9.9 0 0 0-.6.3 2.6 2.6 0 0 0-.8 1.9 4.5 4.5 0 0 0 1 2.4 10.3 10.3 0 0 0 4 3.5c2 .8 2 .5 2.4.5a2.3 2.3 0 0 0 1.5-1.1 1.9 1.9 0 0 0 .1-1.1c0-.1-.2-.2-.4-.3z"></path></svg>
+                        </span>
+                        <div style="font-size:12.5px;font-weight:700;color:var(--green-ink,#1c6b3f)">WhatsApp update for client</div>
+                      </div>
+                      <div style="display:flex;gap:3px;padding:3px;background:var(--green-fill,#e2efe6);border-radius:8px">
+                        <button onClick="{{ c.onWaEn }}" style="{{ c.waEnStyle }}">EN</button>
+                        <button onClick="{{ c.onWaBn }}" style="{{ c.waBnStyle }}">বাং</button>
+                      </div>
+                    </div>
+                    <textarea value="{{ c.waValue }}" onChange="{{ c.onWaText }}" rows="5" style="width:100%;padding:10px 12px;border:1px solid var(--green-line,#cfe6d6);border-radius:9px;background:var(--surface,#fff);font-size:13px;color:var(--ink,#243c2e);outline:none;line-height:1.5;min-height:104px"></textarea>
+                    <div style="display:flex;gap:8px;margin-top:10px">
+                      <a href="{{ c.waHref }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:#fff;background:#1f9d55;padding:9px 15px;border-radius:8px;text-decoration:none" style-hover="background:#1b8a4a">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2z"></path></svg>
+                        Send on WhatsApp
+                      </a>
+                      <button onClick="{{ c.onCopyWa }}" style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--green-ink,#1c6b3f);background:var(--surface,#fff);border:1px solid var(--green-line,#cfe6d6);padding:9px 15px;border-radius:8px" style-hover="background:var(--green-fill,#eaf4ee)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy message
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- files -->
+                  <div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                      <div style="font-size:10.5px;font-weight:700;letter-spacing:0.6px;color:var(--faint,#9aa2b1)">FILES &amp; DOCUMENTS</div>
+                      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink,#16243f);background:var(--surface,#fff);border:1px solid var(--line,#e2ddd4);padding:5px 11px;border-radius:8px;cursor:pointer" style-hover="background:var(--brand,#16243f);color:#fff;border-color:var(--ink,#16243f)">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Upload
+                        <input type="file" accept=".jpg,.jpeg,.png,.doc,.docx,.pdf" multiple onChange="{{ c.onUpload }}" style="display:none" />
+                      </label>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:7px">
+                      <sc-for list="{{ c.files }}" as="f" hint-placeholder-count="1">
+                        <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface,#fff);border:1px solid var(--line,#ece9e3);border-radius:9px">
+                          <span style="{{ f.typeStyle }}">{{ f.typeLabel }}</span>
+                          <span style="flex:1;min-width:0;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.name }}</span>
+                          <sc-if value="{{ f.sample }}" hint-placeholder-val="{{ false }}">
+                            <span style="font-size:10px;font-weight:600;color:var(--faint,#aeb4c0);letter-spacing:0.3px">on file</span>
+                          </sc-if>
+                          <sc-if value="{{ f.hasUrl }}" hint-placeholder-val="{{ false }}">
+                            <button onClick="{{ f.onOpen }}" title="Open" aria-label="Open file" style="width:28px;height:28px;border-radius:7px;color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="background:var(--fill,#f3f5f9);color:var(--ink,#16243f)">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                          </sc-if>
+                          <button onClick="{{ f.onPrint }}" title="Print" aria-label="Print file" style="width:28px;height:28px;border-radius:7px;color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="background:var(--fill,#f3f5f9);color:var(--ink,#16243f)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                          </button>
+                          <sc-if value="{{ f.hasUrl }}" hint-placeholder-val="{{ false }}">
+                            <button onClick="{{ f.onRemove }}" title="Remove" aria-label="Remove file" style="width:28px;height:28px;border-radius:7px;color:#b9947d;display:flex;align-items:center;justify-content:center" style-hover="background:var(--pink-fill,#fbece7);color:#c0492f">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                      <sc-if value="{{ c.noFiles }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:12.5px;color:var(--faint,#aeb4c0);font-weight:500;padding:8px 2px">No documents attached yet — upload JPG, DOC or PDF.</div>
+                      </sc-if>
+                    </div>
+                  </div>
+                  </div>
+                  <!-- end whatsapp+files grid -->
+
+                  <!-- footer: edit/save/delete -->
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line,#f1eee8);padding-top:14px">
+                    <sc-if value="{{ c.armed }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <span style="font-size:12.5px;font-weight:600;color:var(--red-ink,#9a3320)">Delete this case permanently?</span>
+                        <button onClick="{{ c.onConfirmDelete }}" style="font-size:12.5px;font-weight:600;color:#fff;background:#c0492f;padding:7px 14px;border-radius:8px" style-hover="background:#a83c25">Yes, delete</button>
+                        <button onClick="{{ c.onDisarm }}" style="font-size:12.5px;font-weight:600;color:var(--muted,#5b6678);padding:7px 12px;border-radius:8px" style-hover="background:var(--fill,#f3f5f9)">Cancel</button>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ c.notArmed }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ c.onArm }}" style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:#c0492f;padding:8px 12px;border-radius:8px" style-hover="background:var(--pink-fill,#fbece7)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6M14 11v6"></path></svg>
+                        Delete
+                      </button>
+                    </sc-if>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <button onClick="{{ c.onCancel }}" style="font-size:13px;font-weight:600;color:var(--muted,#5b6678);padding:9px 16px;border-radius:9px;border:1px solid var(--line,#e2ddd4)" style-hover="background:var(--fill,#f3f5f9)">Close</button>
+                      <button onClick="{{ c.onSave }}" style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:#fff;background:var(--brand,#16243f);padding:9px 18px;border-radius:9px" style-hover="background:var(--brand-hover,#0f1a30)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Save
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </sc-if>
+
+            </div>
+          </div>
+        </sc-for>
+
+        <!-- RECORDS ON THE SELECTED DATE -->
+        <sc-if value="{{ showRecords }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:6px">
+            <div style="display:flex;align-items:center;gap:9px;margin:6px 0 10px">
+              <span style="font-size:11px;font-weight:700;letter-spacing:0.6px;color:var(--faint,#9aa2b1)">{{ recordsHeading }}</span>
+              <span style="flex:1;height:1px;background:var(--line,#ece9e3)"></span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ records }}" as="r" hint-placeholder-count="0">
+                <div style="display:flex;align-items:center;gap:12px;background:var(--fill,#f6f5f1);border:1px dashed #ddd8cd;border-radius:12px;padding:11px 14px">
+                  <span style="font-size:9.5px;font-weight:700;letter-spacing:0.5px;color:#8a6d3f;background:var(--gold-fill,#f0e7d4);padding:3px 8px;border-radius:6px;flex:0 0 auto">RECORD</span>
+                  <div style="min-width:0;flex:1">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                      <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#8a6d3f">{{ r.no }}</span>
+                      <span style="font-size:13.5px;font-weight:600;color:var(--ink,#16243f)">{{ r.partyA }} <span style="color:var(--faint,#9aa2b1);font-weight:400">vs</span> {{ r.partyB }}</span>
+                    </div>
+                    <div style="font-size:12.5px;color:var(--muted,#5b6678);line-height:1.4;margin-top:3px">{{ r.action }} <span style="color:var(--faint,#9aa2b1)">· forwarded to</span> <b style="color:var(--ink2,#3c485e)">{{ r.fwdLabel }}</b></div>
+                  </div>
+                  <button onClick="{{ r.onOpen }}" title="Open case file" aria-label="Open case file" style="width:32px;height:32px;border-radius:9px;border:1px solid var(--line,#e2ddd4);color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center;flex:0 0 auto" style-hover="background:var(--brand,#16243f);color:#fff;border-color:var(--ink,#16243f)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:60px 20px;text-align:center;color:var(--faint,#aeb4c0)">
+            <div style="font-family:'Source Serif 4',serif;font-size:18px;color:var(--muted2,#8a93a3)">No matters match this view</div>
+            <div style="font-size:13.5px;margin-top:6px">Try clearing the date filter or the search box.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============ CASE FILE POPUP ============ -->
+  <sc-if value="{{ popupOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ onOverlayClose }}" style="position:fixed;inset:0;z-index:50;background:rgba(12,18,30,0.46);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:32px;animation:ldFade 0.16s ease">
+      <div onClick="{{ stopProp }}" style="width:680px;max-width:100%;max-height:88vh;background:var(--bg,#fbfaf8);border-radius:18px;box-shadow:0 30px 80px -20px rgba(12,18,30,0.5);display:flex;flex-direction:column;overflow:hidden;animation:ldPop 0.2s cubic-bezier(0.2,0.8,0.2,1)">
+
+        <div style="padding:22px 26px 0;flex:0 0 auto">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+            <div style="min-width:0">
+              <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#8a6d3f">{{ ocNo }}</span>
+                <span style="font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink2,#42536f);background:var(--blue-fill,#eef1f6);padding:2px 7px;border-radius:5px">{{ ocType }}</span>
+              </div>
+              <h2 style="margin:8px 0 2px;font-family:'Source Serif 4',serif;font-weight:600;font-size:24px;line-height:1.1">{{ ocClient }}</h2>
+              <div style="font-size:13px;color:var(--muted2,#8a93a3);font-weight:500">{{ ocRole }}</div>
+            </div>
+            <button onClick="{{ onCloseCase }}" aria-label="Close" style="flex:0 0 auto;width:36px;height:36px;border-radius:10px;border:1px solid var(--line,#e2ddd4);color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="background:var(--brand,#16243f);color:#fff;border-color:var(--ink,#16243f)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+
+          <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted,#5b6678);font-weight:500">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#aeb4c0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V8l7-4 7 4v13"></path></svg>{{ ocCourt }}
+            </div>
+          </div>
+
+          <div style="display:flex;gap:24px;margin-top:18px;border-bottom:1px solid var(--line,#ece9e3)">
+            <button onClick="{{ onTabHistory }}" style="{{ tabHistoryStyle }}">Case History</button>
+            <button onClick="{{ onTabClient }}" style="{{ tabClientStyle }}">Client Details</button>
+          </div>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding:22px 26px 28px">
+
+          <sc-if value="{{ showHistory }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;background:var(--brand,#16243f);border-radius:13px;color:#fff;margin-bottom:22px">
+                <div>
+                  <div style="font-size:11px;font-weight:700;letter-spacing:0.6px;color:#7e8fb0">NEXT HEARING</div>
+                  <div style="font-family:'Source Serif 4',serif;font-size:18px;font-weight:600;margin-top:3px">{{ ocNextLong }}</div>
+                  <div style="font-size:12px;color:#9fb0cf;margin-top:2px">{{ ocStage }} · {{ ocCourtShort }}</div>
+                </div>
+                <span style="{{ ocDaysBadgeStyle }}">{{ ocDaysLabel }}</span>
+              </div>
+
+              <sc-if value="{{ ocHasTodo }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:10px;padding:12px 14px;background:var(--gold-fill,#f6efe3);border:1px solid var(--gold-line,#e9d9bd);border-radius:11px;margin-bottom:22px">
+                  <span style="font-size:10px;font-weight:700;letter-spacing:0.5px;color:#8a6d3f;flex:0 0 auto;padding-top:2px">PLAN</span>
+                  <div style="font-size:13px;color:#6b5a39;font-weight:500;line-height:1.45">{{ ocNextTodo }}</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ ocHasPayments }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--surface,#fff);border:1px solid var(--line,#ece9e3);border-radius:13px;padding:16px 18px;margin-bottom:22px">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:13px">
+                    <div style="font-size:11px;font-weight:700;letter-spacing:0.6px;color:var(--faint,#9aa2b1)">FEES RECEIVED FROM CLIENT</div>
+                    <div style="font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--ink,#16243f)">{{ ocPayTotal }}</div>
+                  </div>
+                  <div style="display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--fill,#f3f5f9)">
+                    <div style="{{ ocPayHonorBar }}"></div>
+                    <div style="{{ ocPayTaskBar }}"></div>
+                  </div>
+                  <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap">
+                    <div style="display:flex;align-items:center;gap:7px">
+                      <span style="width:11px;height:11px;border-radius:3px;background:#4a73c0;flex:0 0 auto"></span>
+                      <span style="font-size:12px;color:var(--muted,#5b6678);font-weight:500">Honorarium / retainer&nbsp;&nbsp;<b style="color:var(--ink,#16243f);font-family:'IBM Plex Mono',monospace">{{ ocPayHonor }}</b></span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:7px">
+                      <span style="width:11px;height:11px;border-radius:3px;background:#c79a45;flex:0 0 auto"></span>
+                      <span style="font-size:12px;color:var(--muted,#5b6678);font-weight:500">Task / step fees&nbsp;&nbsp;<b style="color:var(--ink,#16243f);font-family:'IBM Plex Mono',monospace">{{ ocPayTask }}</b></span>
+                    </div>
+                  </div>
+                  <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line,#f1eee8);padding-top:13px">
+                    <sc-for list="{{ paymentItems }}" as="p" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <span style="{{ p.dotStyle }}"></span>
+                        <span style="font-size:12.5px;color:var(--ink2,#3c485e);font-weight:500;flex:1;min-width:0">{{ p.label }}</span>
+                        <span style="font-size:11px;color:var(--faint,#9aa2b1);font-family:'IBM Plex Mono',monospace;white-space:nowrap">{{ p.date }}</span>
+                        <span style="font-size:12.5px;color:var(--ink,#16243f);font-weight:600;font-family:'IBM Plex Mono',monospace;white-space:nowrap">{{ p.amount }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.7px;color:var(--faint,#9aa2b1);margin-bottom:14px">ORDER SHEET &amp; PROCEEDINGS</div>
+              <div style="padding-left:6px">
+                <sc-for list="{{ historyItems }}" as="h" hint-placeholder-count="4">
+                  <div style="display:flex;gap:14px;padding-bottom:18px">
+                    <div style="flex:0 0 auto;display:flex;flex-direction:column;align-items:center">
+                      <span style="{{ h.dotStyle }}"></span>
+                      <span style="{{ h.lineStyle }}"></span>
+                    </div>
+                    <div style="flex:1">
+                      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                        <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;color:var(--muted2,#8a93a3)">{{ h.date }}</span>
+                        <span style="font-weight:600;font-size:14.5px;color:var(--ink,#16243f)">{{ h.title }}</span>
+                      </div>
+                      <div style="font-size:13px;color:var(--muted,#5b6678);line-height:1.5;margin-top:3px">{{ h.note }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showClient }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="background:var(--surface,#fff);border:1px solid var(--line,#ece9e3);border-radius:14px;padding:18px 20px;margin-bottom:22px">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+                  <div style="width:48px;height:48px;border-radius:12px;background:var(--brand,#16243f);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-family:'Source Serif 4',serif;font-weight:600;font-size:18px;color:#c7a25f">{{ clientInitials }}</div>
+                  <div>
+                    <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:19px">{{ clientName }}</div>
+                    <div style="font-size:12.5px;color:var(--muted2,#8a93a3);font-weight:500">{{ clientRole }}</div>
+                  </div>
+                </div>
+                <div class="ld-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px">
+                  <div>
+                    <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--faint,#aeb4c0)">PHONE</div>
+                    <div style="font-size:13.5px;font-weight:500;margin-top:2px;font-family:'IBM Plex Mono',monospace">{{ clientPhone }}</div>
+                  </div>
+                  <div>
+                    <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--faint,#aeb4c0)">CLIENT SINCE</div>
+                    <div style="font-size:13.5px;font-weight:500;margin-top:2px">{{ clientSince }}</div>
+                  </div>
+                  <div style="grid-column:1 / -1">
+                    <div style="font-size:11px;font-weight:700;letter-spacing:0.5px;color:var(--faint,#aeb4c0)">ADDRESS</div>
+                    <div style="font-size:13.5px;font-weight:500;margin-top:2px">{{ clientAddress }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.7px;color:var(--faint,#9aa2b1);margin-bottom:12px">{{ clientCasesHeading }}</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ clientCaseList }}" as="cc" hint-placeholder-count="2">
+                  <div style="{{ cc.blockStyle }}">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                      <div style="min-width:0">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+                          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:#8a6d3f">{{ cc.no }}</span>
+                          <span style="font-size:9.5px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--ink2,#42536f);background:var(--blue-fill,#eef1f6);padding:2px 6px;border-radius:5px">{{ cc.type }}</span>
+                          <span style="{{ cc.currentStyle }}">{{ cc.currentLabel }}</span>
+                        </div>
+                        <div style="font-size:13px;color:var(--muted,#5b6678);line-height:1.5;margin-top:6px">{{ cc.summary }}</div>
+                        <div style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:3px 9px;border-radius:999px;background:var(--fill,#f3f5f9);color:var(--ink2,#3c485e);font-size:11.5px;font-weight:600">
+                          <span style="{{ cc.stageDotStyle }}"></span>{{ cc.stage }} · Next {{ cc.nextLabel }}
+                        </div>
+                      </div>
+                      <button onClick="{{ cc.onExpand }}" aria-label="Open this case" title="Open this case" style="flex:0 0 auto;width:32px;height:32px;border-radius:9px;border:1px solid var(--line,#e2ddd4);color:var(--muted,#5b6678);display:flex;align-items:center;justify-content:center" style-hover="background:var(--brand,#16243f);color:#fff;border-color:var(--ink,#16243f)">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                      </button>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- toast -->
+  <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:26px;left:50%;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 18px;background:var(--brand,#16243f);color:#fff;border-radius:11px;box-shadow:0 16px 40px -12px rgba(12,18,30,0.5);font-size:13px;font-weight:600;animation:ldToast 0.22s ease">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      {{ toastText }}
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      dark: this.loadTheme(),
+      calYear: 2026, calMonth: 5, selectedDate: '2026-06-15', search: '',
+      openId: null, tab: 'history',
+      expanded: {}, armId: null, toast: null,
+      waLang: 'en', waText: {},
+      showNoDateOnly: false,
+      personalTodos: this.loadTodos(), todoDraft: '',
+      cases: this.buildInitialCases(),
+      user: this.loadUser(),
+    };
+  }
+
+  get TODAY() { return '2026-06-15'; }
+  LS_KEY = 'ld_diary_overrides_v2';
+  TODO_KEY = 'ld_personal_todos_v1';
+
+  loadTodos() { try { return JSON.parse(window.localStorage.getItem(this.TODO_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  saveTodos(map) { try { window.localStorage.setItem(this.TODO_KEY, JSON.stringify(map)); } catch (e) {} }
+
+  loadUser() { try { const u = JSON.parse(window.localStorage.getItem('ld_user') || 'null'); if (u && u.name) return u; } catch (e) {} return { name: 'Shaon Rahman', photo: '' }; }
+  joinNums(a) { if (a.length <= 1) return a.join(''); return a.slice(0, -1).join(', ') + ' & ' + a[a.length - 1]; }
+
+  loadTheme() { try { return window.localStorage.getItem('ld_theme') === 'dark'; } catch (e) { return false; } }
+  applyTheme(d) { try { document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light'); } catch (e) {} }
+  toggleTheme = () => this.setState(s => { const d = !s.dark; try { window.localStorage.setItem('ld_theme', d ? 'dark' : 'light'); } catch (e) {} this.applyTheme(d); return { dark: d }; });
+
+  componentDidMount() {
+    this.applyTheme(this.state.dark);
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const openId = params.get('open');
+      if (openId && this.state.cases.some(c => c.id === openId)) this.setState({ openId, tab: 'history' });
+    } catch (e) {}
+    this._esc = (e) => { if (e.key === 'Escape' && this.state.openId) this.setState({ openId: null }); };
+    window.addEventListener('keydown', this._esc);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._esc); clearTimeout(this._toastT); }
+
+  // ---------- reference data ----------
+  clients() {
+    return {
+      rahim:   { name: 'Md. Rahimullah', role: 'Plaintiff · Proprietor, Rahim Trading Ltd.', phone: '+880 1711-204488', address: 'Plot 14, Road 7, Mirpur-2, Dhaka 1216', since: 'Mar 2021' },
+      sunrise: { name: 'Sunrise Textiles Ltd.', role: 'Petitioner · Private Limited Company', phone: '+880 1819-770312', address: 'BSCIC Industrial Area, Tongi, Gazipur', since: 'Jan 2023' },
+      mannan:  { name: 'Abdul Mannan', role: 'Accused · Appellant', phone: '+880 1612-559078', address: 'Matuail, Demra, Dhaka 1362', since: 'Aug 2022' },
+      kamal:   { name: 'Kamal Hossain', role: 'Accused (on bail)', phone: '+880 1556-330921', address: 'Sector 7, Uttara, Dhaka 1230', since: 'Feb 2025' },
+      tahmina: { name: 'Tahmina Begum', role: 'Petitioner', phone: '+880 1733-118842', address: 'Tajmahal Road, Mohammadpur, Dhaka', since: 'Jan 2026' },
+      nasrin:  { name: 'Nasrin Akter', role: 'Complainant', phone: '+880 1922-664410', address: 'Board Bazar, Gazipur Sadar, Gazipur', since: 'Sep 2024' },
+      nurul:   { name: 'Nurul Islam', role: 'Plaintiff', phone: '+880 1840-665522', address: 'Chagolnaiya, Feni', since: 'Jun 2026' },
+    };
+  }
+
+  seedCases() {
+    return [
+      { id: 'c1', no: 'Title Suit 184/2024', type: 'Civil', clientKey: 'rahim', court: 'Joint District Judge, 3rd Court, Dhaka', courtShort: 'JDJ 3rd Ct, Dhaka', judge: 'Farzana Rahman', stage: 'Evidence (PW-2)', stageType: 'evidence', priority: 'high',
+        prevDate: '2026-04-22', nextDate: '2026-06-15',
+        courtOrder: 'Date fixed for plaintiff\u2019s evidence \u2014 examination of PW-2 (surveyor).',
+        nextTodo: 'Continue PW-2 (surveyor) examination; file commissioner report.',
+        todayTodo: 'Bring surveyor + measurement map (Ext. 5); finish PW-2 examination.', fee: '', notes: 'Original deeds kept in office vault, locker 3.',
+        oppName: 'Adv. Jahangir Alam', oppPhone: '+880 1715-882200',
+        partiesA: [{ tag: 'A1', name: 'Md. Rahimullah', mine: true, phone: '+880 1711-204488' }, { tag: 'A2', name: 'Rahima Khatun', mine: true, phone: '+880 1733-551200' }],
+        partiesB: [{ tag: 'B1', name: 'Shah Alam' }, { tag: 'B2', name: 'Korim Mia' }, { tag: 'B3', name: 'A.C. Land, Mirpur' }],
+        files: [{ name: 'registered-deed.pdf', sample: true }, { name: 'site-map.jpg', sample: true }],
+        payments: [
+          { date: '2024-03-11', label: 'Engagement honorarium', type: 'honorarium', amount: 40000 },
+          { date: '2024-03-11', label: 'Drafting & filing of plaint', type: 'task', amount: 15000 },
+          { date: '2025-02-14', label: 'PW-1 examination appearance', type: 'task', amount: 8000 },
+          { date: '2025-12-01', label: 'Annual honorarium', type: 'honorarium', amount: 25000 },
+          { date: '2026-04-22', label: 'PW-2 hearing appearance', type: 'task', amount: 8000 },
+        ],
+        summary: 'Declaration of title and permanent injunction over 12 katha of land at Mirpur; defendants dispute the 2019 mutation.',
+        history: [
+          { date: '2024-03-11', kind: 'filing', title: 'Plaint filed & registered', note: 'Ad-valorem court fee paid; suit valued at BDT 1.2 crore.' },
+          { date: '2024-05-02', kind: 'order', title: 'Summons issued', note: 'Service on defendants 1\u20133 directed; SF dakhila filed.' },
+          { date: '2024-07-19', kind: 'filing', title: 'Written statement filed', note: 'Defendants deny title; counter-claim adverse possession.' },
+          { date: '2024-09-30', kind: 'order', title: 'Issues framed', note: 'Six issues settled by the Court for trial.' },
+          { date: '2025-02-14', kind: 'evidence', title: 'PW-1 examined', note: 'Plaintiff examined and cross-examined; deeds exhibited (Ext. 1\u20134).' },
+          { date: '2026-04-22', kind: 'evidence', title: 'PW-2 part-heard', note: 'Surveyor\u2019s examination part-heard; adjourned for continuation.' },
+        ] },
+      { id: 'c2', no: 'Money Suit 56/2025', type: 'Civil', clientKey: 'sunrise', court: 'Joint District Judge, 1st Court, Dhaka', courtShort: 'JDJ 1st Ct, Dhaka', judge: 'Md. Abdul Karim', stage: 'Written Statement', stageType: 'pending', priority: 'medium',
+        prevDate: '2026-03-30', nextDate: '2026-06-15',
+        courtOrder: 'Last date allowed for the defendant to file written statement.',
+        nextTodo: 'Press for written statement; else seek ex-parte hearing.',
+        todayTodo: 'If WS not filed, move for an ex-parte order.', fee: '', notes: 'Invoices 1\u20133 certified copies ready in file.',
+        oppName: 'Adv. Sultana Razia', oppPhone: '+880 1911-447781',
+        partiesA: [{ tag: 'A1', name: 'Sunrise Textiles Ltd.', mine: true, phone: '+880 1819-770312' }],
+        partiesB: [{ tag: 'B1', name: 'Delwar Enterprise' }, { tag: 'B2', name: 'Md. Delwar Hossain' }],
+        files: [{ name: 'invoices-bundle.pdf', sample: true }],
+        summary: 'Recovery of BDT 48,20,000 against supplied yarn under three invoices; defendant denies delivery.',
+        history: [
+          { date: '2025-08-18', kind: 'filing', title: 'Plaint filed', note: 'Suit for recovery with interest; invoices and challans annexed.' },
+          { date: '2025-10-09', kind: 'order', title: 'Summons served', note: 'Defendant entered appearance through counsel.' },
+          { date: '2026-03-30', kind: 'order', title: 'Time for written statement', note: 'Last opportunity granted to file written statement.' },
+        ] },
+      { id: 'c3', no: 'GR 412/2025', type: 'Criminal', clientKey: 'kamal', court: 'Chief Metropolitan Magistrate, Dhaka', courtShort: 'CMM, Dhaka', judge: 'Nasreen Akter', stage: 'Charge Hearing', stageType: 'hearing', priority: 'high',
+        prevDate: '2026-02-15', nextDate: '2026-06-15',
+        courtOrder: 'Date fixed for hearing on framing of charge.',
+        nextTodo: 'Argue against charge framing; press for discharge.',
+        todayTodo: 'Argue discharge u/s 241A CrPC; cite documents.', fee: '', notes: 'Bail bond renewed till Dec 2026.',
+        oppName: 'State \u2014 A.P.P.', oppPhone: '\u2014',
+        partiesA: [{ tag: 'A1', name: 'State (Informant: Hasan Mahmud)' }],
+        partiesB: [{ tag: 'B1', name: 'Kamal Hossain', mine: true, phone: '+880 1556-330921' }],
+        files: [{ name: 'charge-sheet.pdf', sample: true }, { name: 'bail-order.jpg', sample: true }],
+        payments: [
+          { date: '2025-11-05', label: 'Engagement honorarium', type: 'honorarium', amount: 30000 },
+          { date: '2025-12-20', label: 'Bail application & hearing', type: 'task', amount: 20000 },
+          { date: '2026-02-15', label: 'Charge-sheet study & vakalat', type: 'task', amount: 7000 },
+        ],
+        summary: 'Sec. 420/406 of the Penal Code \u2014 alleged cheating in a flat booking. Accused on bail; charge framing pending.',
+        history: [
+          { date: '2025-11-02', kind: 'filing', title: 'FIR recorded', note: 'Case started at Uttara PS on the informant\u2019s complaint.' },
+          { date: '2025-12-20', kind: 'hearing', title: 'Bail granted', note: 'Anticipatory bail confirmed by the Metropolitan Sessions Judge.' },
+          { date: '2026-02-15', kind: 'filing', title: 'Charge sheet submitted', note: 'Police report u/s 173 CrPC placed before the Court.' },
+        ] },
+      { id: 'c4', no: 'Family Suit 22/2026', type: 'Family', clientKey: 'tahmina', court: 'Family Court, Dhaka', courtShort: 'Family Ct, Dhaka', judge: 'Shirin Sultana', stage: 'Mediation', stageType: 'pending', priority: 'medium',
+        prevDate: '2026-04-12', nextDate: '2026-06-16',
+        courtOrder: 'Matter listed for mediation before the Court.',
+        nextTodo: 'Attend mediation; propose lump-sum dower settlement.',
+        todayTodo: '', fee: '', notes: 'Client open to BDT 4,50,000 settlement.',
+        oppName: 'Adv. Kamrul Hasan', oppPhone: '+880 1717-330012',
+        partiesA: [{ tag: 'A1', name: 'Tahmina Begum', mine: true, phone: '+880 1733-118842' }],
+        partiesB: [{ tag: 'B1', name: 'Rafiqul Islam' }],
+        files: [],
+        payments: [
+          { date: '2026-02-04', label: 'Retainer (honorarium)', type: 'honorarium', amount: 18000 },
+          { date: '2026-02-04', label: 'Drafting of plaint', type: 'task', amount: 6000 },
+          { date: '2026-04-12', label: 'Mediation appearance', type: 'task', amount: 5000 },
+        ],
+        summary: 'Recovery of dower (denmohor) of BDT 6,00,000 with maintenance and custody of one minor child; mediation in progress.',
+        history: [
+          { date: '2026-02-04', kind: 'filing', title: 'Suit instituted', note: 'Application for dower, maintenance and custody filed.' },
+          { date: '2026-04-12', kind: 'order', title: 'Notice issued', note: 'Respondent directed to appear; matter referred to mediation.' },
+        ] },
+      { id: 'c5', no: 'Writ Petition 6642/2025', type: 'Writ', clientKey: 'sunrise', court: 'High Court Division, Supreme Court', courtShort: 'High Court Division', judge: 'Justice S.M. Kuddus', stage: 'Rule Hearing', stageType: 'hearing', priority: 'high',
+        prevDate: '2026-05-11', nextDate: '2026-06-18',
+        courtOrder: 'Rule returnable \u2014 listed for final hearing.',
+        nextTodo: 'Final hearing of the Rule; submit citation list.',
+        todayTodo: '', fee: '', notes: 'Stay order copy filed in the lower forum.',
+        oppName: 'Deputy Attorney General', oppPhone: '\u2014',
+        partiesA: [{ tag: 'A1', name: 'Sunrise Textiles Ltd.', mine: true, phone: '+880 1819-770312' }],
+        partiesB: [{ tag: 'B1', name: 'Commissioner, VAT (NBR)' }, { tag: 'B2', name: 'Govt. of Bangladesh' }],
+        files: [{ name: 'stay-order.pdf', sample: true }],
+        payments: [
+          { date: '2025-09-22', label: 'Brief & honorarium', type: 'honorarium', amount: 75000 },
+          { date: '2025-09-22', label: 'Drafting of writ petition', type: 'task', amount: 30000 },
+          { date: '2026-05-11', label: 'Affidavit & hearing preparation', type: 'task', amount: 15000 },
+        ],
+        summary: 'Challenge to a VAT demand order; interim stay obtained, Rule now returnable for final hearing.',
+        history: [
+          { date: '2025-09-22', kind: 'filing', title: 'Writ moved', note: 'Petition filed challenging the demand-cum-show-cause order.' },
+          { date: '2025-09-29', kind: 'order', title: 'Rule issued with stay', note: 'Interim stay of recovery for 6 months granted.' },
+          { date: '2026-05-11', kind: 'order', title: 'Affidavit-in-opposition filed', note: 'Respondents filed reply; matter listed for hearing.' },
+        ] },
+      { id: 'c6', no: 'Sessions Case 305/2024', type: 'Criminal', clientKey: 'mannan', court: 'Metropolitan Sessions Judge, Dhaka', courtShort: 'Sessions Ct, Dhaka', judge: 'Md. Shahidul Islam', stage: 'Examination of Witnesses', stageType: 'evidence', priority: 'medium',
+        prevDate: '2026-03-05', nextDate: '2026-06-18',
+        courtOrder: 'Fixed for examination of prosecution witness PW-3 (Investigating Officer).',
+        nextTodo: 'Cross-examine I.O. (PW-3) on the seizure list.',
+        todayTodo: '', fee: '', notes: 'Discrepancy in seizure-list time noted for cross.',
+        oppName: 'State \u2014 A.P.P.', oppPhone: '\u2014',
+        partiesA: [{ tag: 'A1', name: 'State (Victim: Sumon Mia)' }],
+        partiesB: [{ tag: 'B1', name: 'Abdul Mannan', mine: true, phone: '+880 1612-559078' }],
+        files: [{ name: 'seizure-list.jpg', sample: true }],
+        summary: 'Sec. 326 of the Penal Code \u2014 grievous hurt. Three prosecution witnesses examined; defence cross part-heard.',
+        history: [
+          { date: '2024-06-30', kind: 'order', title: 'Charge framed', note: 'Charge read over; accused pleaded not guilty and claimed trial.' },
+          { date: '2025-01-20', kind: 'evidence', title: 'PW-1 & PW-2 examined', note: 'Informant and victim examined; medical certificate exhibited.' },
+          { date: '2026-03-05', kind: 'evidence', title: 'PW-3 examined', note: 'Investigating officer examined; cross-examination part-heard.' },
+        ] },
+      { id: 'c7', no: 'Civil Revision 410/2024', type: 'Civil', clientKey: 'rahim', court: 'District Judge, Dhaka', courtShort: 'District Judge, Dhaka', judge: 'Anwara Khatun', stage: 'Argument', stageType: 'argument', priority: 'low',
+        prevDate: '2025-05-19', nextDate: '2026-06-23',
+        courtOrder: 'Listed for hearing of arguments.',
+        nextTodo: 'Conclude arguments; hand over written notes.',
+        todayTodo: '', fee: '', notes: 'Connected to Title Suit 184/2024.',
+        oppName: 'Adv. Jahangir Alam', oppPhone: '+880 1715-882200',
+        partiesA: [{ tag: 'A1', name: 'Md. Rahimullah', mine: true, phone: '+880 1711-204488' }],
+        partiesB: [{ tag: 'B1', name: 'Shah Alam' }],
+        files: [],
+        summary: 'Revision against rejection of a temporary injunction application in the connected title matter; arguments at final stage.',
+        history: [
+          { date: '2024-08-14', kind: 'filing', title: 'Revision filed', note: 'Against order rejecting the T.I. application.' },
+          { date: '2025-05-19', kind: 'order', title: 'Status quo directed', note: 'Parties directed to maintain status quo pending disposal.' },
+        ] },
+      { id: 'c8', no: 'CR 88/2026', type: 'Criminal', clientKey: 'nasrin', court: 'Chief Judicial Magistrate, Gazipur', courtShort: 'CJM, Gazipur', judge: 'Mahmuda Parveen', stage: 'Cognizance', stageType: 'pending', priority: 'medium',
+        prevDate: '2026-05-15', nextDate: '2026-06-23',
+        courtOrder: 'Fixed for cognizance and issuing of process.',
+        nextTodo: 'Press for issuing process u/s 138 NI Act.',
+        todayTodo: '', fee: '', notes: 'Cheque & bank return memo (originals) in file.',
+        oppName: 'Adv. Mizanur Rahman', oppPhone: '+880 1811-220034',
+        partiesA: [{ tag: 'A1', name: 'Nasrin Akter', mine: true, phone: '+880 1922-664410' }],
+        partiesB: [{ tag: 'B1', name: 'Abul Kashem' }],
+        files: [{ name: 'cheque.jpg', sample: true }, { name: 'legal-notice.pdf', sample: true }],
+        summary: 'Sec. 138 of the Negotiable Instruments Act \u2014 dishonour of a cheque for BDT 3,50,000 after a valid notice.',
+        history: [
+          { date: '2026-04-28', kind: 'filing', title: 'Complaint filed', note: 'Petition of complaint with dishonoured cheque and notice annexed.' },
+          { date: '2026-05-15', kind: 'hearing', title: 'Statement recorded', note: 'Complainant\u2019s initial statement recorded u/s 200 CrPC.' },
+        ] },
+      { id: 'c9', no: 'Criminal Appeal 1207/2023', type: 'Criminal', clientKey: 'mannan', court: 'High Court Division, Supreme Court', courtShort: 'High Court Division', judge: 'Justice Reazul Haque', stage: 'Awaiting Hearing', stageType: 'pending', priority: 'low',
+        prevDate: '2024-02-26', nextDate: '2026-06-22',
+        courtOrder: 'In the list \u2014 awaiting hearing of the appeal.',
+        nextTodo: 'Mention for early hearing; extend bail.',
+        todayTodo: '', fee: '', notes: 'Paper-book vols. I & II in office.',
+        oppName: 'State \u2014 A.P.P.', oppPhone: '\u2014',
+        partiesA: [{ tag: 'A1', name: 'State' }],
+        partiesB: [{ tag: 'B1', name: 'Abdul Mannan', mine: true, phone: '+880 1612-559078' }],
+        files: [],
+        summary: 'Appeal against conviction u/s 379 of the Penal Code; sentence suspended and appellant on bail pending hearing.',
+        history: [
+          { date: '2023-11-08', kind: 'filing', title: 'Appeal admitted', note: 'Appeal admitted and sentence suspended.' },
+          { date: '2024-02-26', kind: 'order', title: 'Paper-book ready', note: 'Lower court records received; paper-book prepared.' },
+        ] },
+      { id: 'c10', no: 'Chagolnaiya Deo-27/19', type: 'Civil', clientKey: 'nurul', court: 'Senior Assistant Judge Court, Chagolnaiya, Feni', courtShort: 'Sr. Asst. Judge, Chagolnaiya', judge: 'Abdul Based', stage: 'Filed', stageType: 'pending', priority: 'medium',
+        prevDate: '', nextDate: '',
+        courtOrder: '',
+        nextTodo: '',
+        todayTodo: '', fee: '', notes: 'Newly engaged matter \u2014 collect cause list & last order, then set next date.',
+        oppName: '', oppPhone: '',
+        partiesA: [{ tag: 'A1', name: 'Nurul Islam', mine: true, phone: '+880 1840-665522' }],
+        partiesB: [{ tag: 'B1', name: 'Abdul Jalil' }, { tag: 'B2', name: 'Abdus Salam' }],
+        files: [],
+        summary: 'Partition suit (banton) over homestead land at Chagolnaiya; next date and plan not yet set.',
+        history: [
+          { date: '2019-07-22', kind: 'filing', title: 'Suit filed', note: 'Partition suit instituted; pending for steps.' },
+        ] },
+      { id: 'c11', no: 'Title Execution 09/2025', type: 'Civil', clientKey: 'rahim', court: 'Joint District Judge, 2nd Court, Dhaka', courtShort: 'JDJ 2nd Ct, Dhaka', judge: 'Ferdousi Begum', stage: 'Execution', stageType: 'pending', priority: 'high',
+        prevDate: '2026-05-13', nextDate: '2026-06-10',
+        courtOrder: 'Hearing on the execution petition; matter adjourned. Court did not fix a fresh date.',
+        nextTodo: '',
+        todayTodo: 'Mention before the court and get a new date fixed.', fee: '', notes: 'Hearing was put off (adjourned without a date) \u2014 follow up and fix a fresh date.',
+        oppName: 'Adv. Sohel Rana', oppPhone: '+880 1717-908112',
+        plaintiff: { name: 'Md. Rahimullah', mine: true, clientNumbers: '1', commName: 'Imran Rahimullah (son)', commPhones: ['+880 1712-556677'], careName: 'Clerk \u2014 Md. Jashim', carePhones: ['+880 1819-330077'] },
+        defendant: { name: 'Shah Alam', mine: false, clientNumbers: '', commName: '', commPhones: [''], careName: '', carePhones: [''] },
+        partiesA: [{ tag: 'A1', name: 'Md. Rahimullah', mine: true, phone: '+880 1711-204488' }],
+        partiesB: [{ tag: 'B1', name: 'Shah Alam' }],
+        files: [],
+        summary: 'Execution of the decree in the connected title matter; last fixed date passed with no new date taken.',
+        history: [
+          { date: '2025-09-10', kind: 'filing', title: 'Execution filed', note: 'Execution case filed to enforce the decree.' },
+          { date: '2026-05-13', kind: 'hearing', title: 'Part-heard', note: 'Arguments part-heard; adjourned to 10 Jun 2026.' },
+          { date: '2026-06-10', kind: 'hearing', title: 'Adjourned \u2014 no date', note: 'Court adjourned the matter without fixing a fresh date.' },
+        ] },
+    ];
+  }
+
+  buildInitialCases() {
+    const seed = this.seedCases();
+    let overrides = {};
+    try { overrides = JSON.parse(window.localStorage.getItem(this.LS_KEY) || '{}') || {}; } catch (e) { overrides = {}; }
+    let added = [];
+    try { added = JSON.parse(window.localStorage.getItem('ld_new_cases_v1') || '[]') || []; } catch (e) { added = []; }
+    const base = seed.concat(added);
+    return base.map(c => {
+      const o = overrides[c.id];
+      const withApp = { appearances: c.appearances || [], ...c };
+      if (!o) return withApp;
+      return { ...withApp, nextDate: o.nextDate ?? c.nextDate, nextTodo: o.nextTodo ?? c.nextTodo, courtOrder: o.courtOrder ?? c.courtOrder, fee: o.fee ?? c.fee, notes: o.notes ?? c.notes, oppName: o.oppName ?? c.oppName, oppPhone: o.oppPhone ?? c.oppPhone, prevDate: o.prevDate ?? c.prevDate, todayTodo: o.todayTodo ?? c.todayTodo, appearances: o.appearances ?? withApp.appearances, receivedDate: o.receivedDate ?? c.receivedDate, commName: o.commName ?? c.commName, commPhone: o.commPhone ?? c.commPhone, careName: o.careName ?? c.careName, carePhone: o.carePhone ?? c.carePhone, oppForDef: o.oppForDef ?? c.oppForDef, sunani: o.sunani ?? c.sunani, todbir: o.todbir ?? c.todbir };
+    });
+  }
+  persist(cases) {
+    const map = {};
+    cases.forEach(c => { map[c.id] = { nextDate: c.nextDate, nextTodo: c.nextTodo, courtOrder: c.courtOrder, fee: c.fee, notes: c.notes, oppName: c.oppName, oppPhone: c.oppPhone, prevDate: c.prevDate, todayTodo: c.todayTodo, appearances: c.appearances, receivedDate: c.receivedDate, commName: c.commName, commPhone: c.commPhone, careName: c.careName, carePhone: c.carePhone, oppForDef: c.oppForDef, sunani: c.sunani, todbir: c.todbir }; });
+    try { window.localStorage.setItem(this.LS_KEY, JSON.stringify(map)); } catch (e) {}
+  }
+
+  // ---------- date helpers ----------
+  MONTHS_F = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  DOW_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  DOW_F = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  parse(iso) { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); }
+  iso(dt) { return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0'); }
+  daysFrom(iso) { if (!iso) return NaN; return Math.round((this.parse(iso) - this.parse(this.TODAY)) / 86400000); }
+  fmtShort(iso) { if (!iso) return '\u2014'; const d = this.parse(iso); return d.getDate() + ' ' + this.MONTHS_S[d.getMonth()]; }
+  fmtMed(iso) { if (!iso) return '\u2014'; const d = this.parse(iso); return d.getDate() + ' ' + this.MONTHS_S[d.getMonth()] + ' ' + d.getFullYear(); }
+  fmtLong(iso) { if (!iso) return 'Not scheduled'; const d = this.parse(iso); return this.DOW_S[d.getDay()] + ', ' + d.getDate() + ' ' + this.MONTHS_S[d.getMonth()] + ' ' + d.getFullYear(); }
+  daysLabel(iso) { if (!iso) return ''; const n = this.daysFrom(iso); if (n === 0) return 'Today'; if (n === 1) return 'Tomorrow'; if (n === -1) return 'Yesterday'; if (n > 0) return 'in ' + n + ' days'; return Math.abs(n) + ' days ago'; }
+  addDays(iso, n) { if (!iso) return ''; const d = this.parse(iso); d.setDate(d.getDate() + n); return this.iso(d); }
+
+  // A matter is "missing a next date" when it has no next date at all, OR when its
+  // last fixed date has already passed without a new date being taken (court adjourned
+  // with no fresh date). Reminders run from the day AFTER that trigger date.
+  needsNextDate(c) { return !c.nextDate || c.nextDate < this.TODAY; }
+  triggerDate(c) {
+    if (c.nextDate && c.nextDate < this.TODAY) return c.nextDate; // hearing date elapsed, none taken
+    return c.prevDate || c.receivedDate || '';
+  }
+  reminderLineText(c) {
+    const t = this.triggerDate(c);
+    const since = t ? this.addDays(t, 1) : '';
+    if (c.nextDate && c.nextDate < this.TODAY) {
+      return 'Date ' + this.fmtMed(c.nextDate) + ' passed with no new date taken \u2014 reminding since ' + this.fmtMed(since) + ', every 2 days.';
+    }
+    if (since) return 'No next date set \u2014 reminding since ' + this.fmtMed(since) + ', every 2 days until updated.';
+    return 'No next date set \u2014 you\u2019ll be reminded every 2 days until updated.';
+  }
+
+  // ---------- Bengali (Bangla / Bangabda) calendar ----------
+  BN_MONTHS_BN = ['\u09ac\u09c8\u09b6\u09be\u0996','\u099c\u09cd\u09af\u09c8\u09b7\u09cd\u09a0','\u0986\u09b7\u09be\u09a2\u09bc','\u09b6\u09cd\u09b0\u09be\u09ac\u09a3','\u09ad\u09be\u09a6\u09cd\u09b0','\u0986\u09b6\u09cd\u09ac\u09bf\u09a8','\u0995\u09be\u09b0\u09cd\u09a4\u09bf\u0995','\u0985\u0997\u09cd\u09b0\u09b9\u09be\u09af\u09bc\u09a3','\u09aa\u09cc\u09b7','\u09ae\u09be\u0998','\u09ab\u09be\u09b2\u09cd\u0997\u09c1\u09a8','\u099a\u09c8\u09a4\u09cd\u09b0'];
+  BN_DIGITS = ['\u09e6','\u09e7','\u09e8','\u09e9','\u09ea','\u09eb','\u09ec','\u09ed','\u09ee','\u09ef'];
+  bnNum(n) { return String(n).split('').map(d => /[0-9]/.test(d) ? this.BN_DIGITS[+d] : d).join(''); }
+  toBengali(iso) {
+    if (!iso) return null;
+    const g = this.parse(iso);
+    const gy = g.getFullYear();
+    const boishakh = new Date(gy, 3, 14); // Pohela Boishakh = 14 April
+    const startYear = g < boishakh ? gy - 1 : gy;
+    const epoch = new Date(startYear, 3, 14);
+    let doy = Math.round((g - epoch) / 86400000);
+    const nextGY = startYear + 1;
+    const leap = (nextGY % 4 === 0 && nextGY % 100 !== 0) || (nextGY % 400 === 0);
+    const lens = [31, 31, 31, 31, 31, 30, 30, 30, 30, 30, leap ? 31 : 30, 30];
+    let m = 0;
+    while (m < 11 && doy >= lens[m]) { doy -= lens[m]; m++; }
+    return { day: doy + 1, month: m, year: startYear - 593 };
+  }
+  bengaliLabel(iso) {
+    const b = this.toBengali(iso);
+    if (!b) return '\u2014';
+    return this.bnNum(b.day) + ' ' + this.BN_MONTHS_BN[b.month] + ' ' + this.bnNum(b.year);
+  }
+  yearOptions() {
+    const cur = this.state.calYear;
+    const start = Math.min(2018, cur - 5), end = Math.max(2032, cur + 5);
+    const a = [];
+    for (let y = start; y <= end; y++) a.push({ value: String(y), label: String(y) });
+    return a;
+  }
+
+  stageColor(t) { return ({ evidence: '#b58a36', hearing: '#2f7a5f', argument: 'var(--blue-ink,#2a4d8f)', pending: 'var(--muted2,#8a93a3)' })[t] || 'var(--muted2,#8a93a3)'; }
+  kindColor(k) { return ({ filing: 'var(--muted2,#8a93a3)', order: 'var(--blue-ink,#2a4d8f)', evidence: '#b58a36', hearing: '#2f7a5f', disposal: '#c0492f' })[k] || 'var(--muted2,#8a93a3)'; }
+  priLabel(p) { return ({ high: 'High priority', medium: 'Medium', low: 'Low' })[p]; }
+  priTagStyle(p) {
+    const map = { high: ['#fbe9e4', '#b23a22'], medium: ['#fbf2dc', '#9a7416'], low: ['var(--blue-fill,#eef1f6)', 'var(--muted,#5b6678)'] };
+    const [bg, c] = map[p];
+    return { fontSize: '10px', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase', color: c, background: bg, padding: '2px 7px', borderRadius: '5px' };
+  }
+  extType(name) {
+    const e = (name.split('.').pop() || '').toLowerCase();
+    if (e === 'pdf') return 'PDF';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(e)) return 'IMG';
+    if (['doc', 'docx'].includes(e)) return 'DOC';
+    return 'FILE';
+  }
+  fileTypeStyle(label) {
+    const map = { PDF: ['#fbe9e4', '#b23a22'], IMG: ['var(--green-fill,#e7f1ec)', '#2f7a5f'], DOC: ['#e8edf6', 'var(--blue-ink,#2a4d8f)'], FILE: ['var(--blue-fill,#eef1f6)', 'var(--muted,#5b6678)'] };
+    const [bg, c] = map[label] || map.FILE;
+    return { fontFamily: "'IBM Plex Mono', monospace", fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.3px', color: c, background: bg, padding: '3px 6px', borderRadius: '5px', flex: '0 0 auto' };
+  }
+
+  hearingMap() {
+    const map = {};
+    this.state.cases.forEach(c => { if (c.nextDate) { (map[c.nextDate] = map[c.nextDate] || []).push(c.id); } });
+    return map;
+  }
+
+  buildCalendar(hmap) {
+    const y = this.state.calYear, m = this.state.calMonth;
+    const first = new Date(y, m, 1);
+    const start = 1 - first.getDay();
+    const weeks = [];
+    for (let w = 0; w < 6; w++) {
+      const row = [];
+      for (let i = 0; i < 7; i++) {
+        const dt = new Date(y, m, start + w * 7 + i);
+        const iso = this.iso(dt);
+        const other = dt.getMonth() !== m;
+        const cnt = (hmap[iso] || []).length;
+        const isToday = iso === this.TODAY;
+        const isSel = iso === this.state.selectedDate;
+        const weekend = dt.getDay() === 5 || dt.getDay() === 6;
+        const cellStyle = { position: 'relative', height: '40px', borderRadius: '9px', border: '1px solid transparent', background: weekend ? 'var(--fill,#f6f5f1)' : 'var(--surface,#fff)', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start', padding: '5px 7px', transition: 'filter .12s' };
+        const numStyle = { fontFamily: "'IBM Plex Mono', monospace", fontSize: '12.5px', fontWeight: 600, color: other ? '#c4c9d2' : (weekend ? 'var(--faint,#9aa2b1)' : 'var(--ink2,#42536f)') };
+        if (cnt > 0 && !other) cellStyle.background = `rgba(22,36,63,${(0.05 + 0.06 * cnt).toFixed(3)})`;
+        if (isToday) { cellStyle.border = '1px solid #b08d57'; cellStyle.boxShadow = 'inset 0 0 0 1px #b08d57'; }
+        if (isSel) { cellStyle.background = '#16243f'; cellStyle.border = '1px solid var(--brand,#16243f)'; cellStyle.boxShadow = 'none'; numStyle.color = '#fff'; }
+        if (other) cellStyle.opacity = 0.55;
+        const badgeStyle = { position: 'absolute', bottom: '3px', right: '4px', minWidth: '15px', height: '15px', padding: '0 3px', borderRadius: '8px', background: isSel ? '#c7a25f' : '#b08d57', color: '#fff', fontSize: '9.5px', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center' };
+        row.push({ day: dt.getDate(), iso, count: cnt, showBadge: false, cellStyle, numStyle, badgeStyle,
+          title: cnt > 0 ? `${cnt} hearing${cnt > 1 ? 's' : ''} on ${this.fmtMed(iso)}` : this.fmtMed(iso),
+          onClick: () => this.onDay(iso, dt.getMonth(), dt.getFullYear()) });
+      }
+      weeks.push(row);
+    }
+    return weeks;
+  }
+
+  // ---------- handlers ----------
+  onDay(iso, mIdx, yr) { this.setState(s => ({ selectedDate: s.selectedDate === iso ? null : iso, calMonth: mIdx, calYear: yr })); }
+  onPrevMonth = () => this.setState(s => { let m = s.calMonth - 1, y = s.calYear; if (m < 0) { m = 11; y--; } return { calMonth: m, calYear: y }; });
+  onNextMonth = () => this.setState(s => { let m = s.calMonth + 1, y = s.calYear; if (m > 11) { m = 0; y++; } return { calMonth: m, calYear: y }; });
+  onMonthSelect = (e) => this.setState({ calMonth: parseInt(e.target.value, 10) });
+  onYearSelect = (e) => this.setState({ calYear: parseInt(e.target.value, 10) });
+  onToday = () => this.setState({ selectedDate: this.TODAY, calMonth: 5, calYear: 2026 });
+  onClearDate = () => this.setState({ selectedDate: null });
+  onSearch = (e) => this.setState({ search: e.target.value });
+  openCase = (id) => this.setState({ openId: id, tab: 'history' });
+  onCloseCase = () => this.setState({ openId: null });
+  onOverlayClose = () => this.setState({ openId: null });
+  stopProp = (e) => e.stopPropagation();
+  toggleExpand = (id) => this.setState(s => ({ expanded: { ...s.expanded, [id]: !s.expanded[id] }, armId: s.armId === id ? null : s.armId }));
+  collapse = (id) => this.setState(s => ({ expanded: { ...s.expanded, [id]: false }, armId: null }));
+  showToast(msg) { clearTimeout(this._toastT); this.setState({ toast: msg }); this._toastT = setTimeout(() => this.setState({ toast: null }), 2200); }
+
+  updateField(id, field, value) {
+    this.setState(s => {
+      const cases = s.cases.map(c => c.id === id ? { ...c, [field]: value } : c);
+      this.persist(cases);
+      return { cases };
+    });
+  }
+  onSave = (id) => { this.collapse(id); this.showToast('Case saved'); };
+
+  setFwd(id, value) { this.setState(s => ({ fwd: { ...(s.fwd || {}), [id]: value } })); }
+  forwardCase = (id) => {
+    const newDate = (this.state.fwd || {})[id];
+    if (!newDate) { this.showToast('Pick a next date first'); return; }
+    this.setState(s => {
+      const cases = s.cases.map(c => {
+        if (c.id !== id) return c;
+        const oldDate = c.nextDate;
+        const appearances = (c.appearances || []).slice();
+        let history = c.history;
+        if (oldDate) {
+          appearances.push({ date: oldDate, prevDate: c.prevDate || '', action: c.todayTodo || '', courtOrder: c.courtOrder || '', nextDate: newDate });
+          history = c.history.concat([{ date: oldDate, kind: 'hearing', title: 'Heard \u2014 date taken', note: (c.todayTodo || c.courtOrder || 'Matter taken up; adjourned to next date.') }]);
+        }
+        return { ...c, appearances, history, prevDate: oldDate || c.prevDate, nextDate: newDate, todayTodo: '' };
+      });
+      this.persist(cases);
+      const fwd = { ...(s.fwd || {}) }; delete fwd[id];
+      return { cases, fwd };
+    });
+    this.showToast('Forwarded \u2014 a record stays on the old date');
+  };
+
+  toggleNoDateOnly = () => this.setState(s => ({ showNoDateOnly: !s.showNoDateOnly, selectedDate: null }));
+
+  // ---------- personal to-do ----------
+  todoDate() { return this.state.selectedDate || this.TODAY; }
+  setTodoDraft = (e) => this.setState({ todoDraft: e.target.value });
+  addTodo = () => {
+    const text = (this.state.todoDraft || '').trim();
+    if (!text) return;
+    const d = this.todoDate();
+    this.setState(s => {
+      const map = { ...s.personalTodos };
+      const list = (map[d] || []).slice();
+      list.push({ id: 't' + Date.now().toString(36), text, done: false });
+      map[d] = list;
+      this.saveTodos(map);
+      return { personalTodos: map, todoDraft: '' };
+    });
+  };
+  editTodo(tid, text) {
+    const d = this.todoDate();
+    this.setState(s => {
+      const map = { ...s.personalTodos };
+      map[d] = (map[d] || []).map(t => t.id === tid ? { ...t, text } : t);
+      this.saveTodos(map);
+      return { personalTodos: map };
+    });
+  }
+  toggleTodo(tid) {
+    const d = this.todoDate();
+    this.setState(s => {
+      const map = { ...s.personalTodos };
+      map[d] = (map[d] || []).map(t => t.id === tid ? { ...t, done: !t.done } : t);
+      this.saveTodos(map);
+      return { personalTodos: map };
+    });
+  }
+  deleteTodo(tid) {
+    const d = this.todoDate();
+    this.setState(s => {
+      const map = { ...s.personalTodos };
+      map[d] = (map[d] || []).filter(t => t.id !== tid);
+      this.saveTodos(map);
+      return { personalTodos: map };
+    });
+  }
+  arm = (id) => this.setState({ armId: id });
+  disarm = () => this.setState({ armId: null });
+  confirmDelete = (id) => {
+    this.setState(s => {
+      const cases = s.cases.filter(c => c.id !== id);
+      this.persist(cases);
+      const expanded = { ...s.expanded }; delete expanded[id];
+      return { cases, armId: null, expanded, openId: s.openId === id ? null : s.openId };
+    });
+    this.showToast('Case deleted');
+  };
+  addFiles(id, fileList) {
+    const arr = [...fileList];
+    if (!arr.length) return;
+    const add = arr.map(f => ({ name: f.name, typeLabel: this.extType(f.name), url: URL.createObjectURL(f), hasUrl: true }));
+    this.setState(s => ({ cases: s.cases.map(c => c.id === id ? { ...c, files: [...c.files, ...add] } : c) }));
+    this.showToast(add.length + ' file' + (add.length > 1 ? 's' : '') + ' uploaded');
+  }
+  removeFile(id, idx) {
+    this.setState(s => ({ cases: s.cases.map(c => c.id === id ? { ...c, files: c.files.filter((_, i) => i !== idx) } : c) }));
+  }
+  openFile(url) { if (url) window.open(url, '_blank', 'noopener'); }
+  printFile(f) {
+    if (f.url) { const w = window.open(f.url, '_blank'); if (w) { try { w.addEventListener('load', () => { w.focus(); w.print(); }); } catch (e) {} } }
+    else { this.showToast('Printing ' + f.name + '\u2026'); }
+  }
+
+  // ---------- WhatsApp ----------
+  setWaLang(lang) { this.setState({ waLang: lang, waText: {} }); }
+  onWaText = (id, value) => this.setState(s => ({ waText: { ...s.waText, [id]: value } }));
+  waMyClient(c) { return c.partiesA.concat(c.partiesB).find(p => p.mine) || c.partiesA[0] || { name: 'client', phone: '' }; }
+  waPhone(c) { const p = this.waMyClient(c); return (p.phone || '').replace(/[^0-9]/g, ''); }
+  waMessage(c, lang) {
+    const cl = this.waMyClient(c);
+    const order = c.courtOrder || (lang === 'bn' ? '\u09AE\u09BE\u09AE\u09B2\u09BE\u099F\u09BF \u09B6\u09C1\u09A8\u09BE\u09A8\u09BF\u09B0 \u099C\u09A8\u09CD\u09AF \u0997\u09CD\u09B0\u09B9\u09A3 \u0995\u09B0\u09BE \u09B9\u09AF\u09BC\u09C7\u099B\u09C7' : 'the matter was taken up');
+    if (lang === 'bn') {
+      const lines = [];
+      lines.push('\u0986\u09B8\u09CD\u09B8\u09BE\u09B2\u09BE\u09AE\u09C1 \u0986\u09B2\u09BE\u0987\u0995\u09C1\u09AE, ' + cl.name + '\u0964');
+      lines.push('\u0986\u09AA\u09A8\u09BE\u09B0 \u09AE\u09BE\u09AE\u09B2\u09BE ' + c.no + ' (' + c.court + ') \u09AA\u09CD\u09B0\u09B8\u0999\u09CD\u0997\u09C7 \u0986\u099C\u0995\u09C7\u09B0 \u0986\u09AA\u09A1\u09C7\u099F:');
+      lines.push('\u2022 \u0986\u09A6\u09BE\u09B2\u09A4: ' + order + '\u0964');
+      if (c.nextDate) lines.push('\u2022 \u09AA\u09B0\u09AC\u09B0\u09CD\u09A4\u09C0 \u09A4\u09BE\u09B0\u09BF\u0996: ' + this.fmtLong(c.nextDate) + '\u0964');
+      else lines.push('\u2022 \u09AA\u09B0\u09AC\u09B0\u09CD\u09A4\u09C0 \u09A4\u09BE\u09B0\u09BF\u0996 \u09B6\u09C0\u0998\u09CD\u09B0\u0987 \u099C\u09BE\u09A8\u09BE\u09A8\u09CB \u09B9\u09AC\u09C7\u0964');
+      if (c.nextTodo) lines.push('\u2022 \u0995\u09B0\u09A3\u09C0\u09AF\u09BC: ' + c.nextTodo);
+      lines.push('');
+      lines.push('\u2014 \u0986\u09AA\u09A8\u09BE\u09B0 \u0986\u0987\u09A8\u099C\u09C0\u09AC\u09C0');
+      return lines.join('\n');
+    }
+    const lines = [];
+    lines.push('Assalamu Alaikum, ' + cl.name + '.');
+    lines.push('Update on your case ' + c.no + ' (' + c.court + '):');
+    lines.push('\u2022 Court today: ' + order + '.');
+    if (c.nextDate) lines.push('\u2022 Next date: ' + this.fmtLong(c.nextDate) + '.');
+    else lines.push('\u2022 Next date will be confirmed shortly.');
+    if (c.nextTodo) lines.push('\u2022 To note: ' + c.nextTodo);
+    lines.push('');
+    lines.push('\u2014 Your Advocate');
+    return lines.join('\n');
+  }
+  copyWa(id) {
+    const c = this.state.cases.find(x => x.id === id);
+    const text = this.state.waText[id] ?? this.waMessage(c, this.state.waLang);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+      else { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); }
+      this.showToast('Message copied');
+    } catch (e) { this.showToast('Message copied'); }
+  }
+
+  tabStyle(active) {
+    return active
+      ? { padding: '0 0 12px', fontSize: '14px', fontWeight: 600, color: 'var(--ink,#16243f)', borderBottom: '2px solid #b08d57', marginBottom: '-1px' }
+      : { padding: '0 0 12px', fontSize: '14px', fontWeight: 600, color: 'var(--faint,#9aa2b1)', borderBottom: '2px solid transparent', marginBottom: '-1px' };
+  }
+  waSegStyle(active) {
+    return active
+      ? { padding: '5px 11px', borderRadius: '6px', fontSize: '11.5px', fontWeight: 700, color: 'var(--green-ink,#1c6b3f)', background: 'var(--surface,#fff)', boxShadow: '0 1px 2px rgba(28,107,63,0.18)' }
+      : { padding: '5px 11px', borderRadius: '6px', fontSize: '11.5px', fontWeight: 600, color: '#5d8a70', background: 'transparent' };
+  }
+
+  sideChip(side) {
+    const plaintiff = side === 'Plaintiff';
+    return { fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase', flex: '0 0 auto',
+      color: plaintiff ? '#8a6d3f' : 'var(--ink2,#42536f)', background: plaintiff ? 'var(--gold-fill,#f6efe3)' : 'var(--blue-fill,#eef1f6)',
+      border: '1px solid ' + (plaintiff ? 'var(--gold-line,#e9d9bd)' : 'var(--blue-line,#d6deeb)'), padding: '3px 8px', borderRadius: '6px' };
+  }
+  partyLead(arr) {
+    if (!arr || !arr.length) return '';
+    const first = (arr[0].name || '').split(' (')[0];
+    return arr.length > 1 ? first + ' & ors.' : first;
+  }
+  tileStyles(c) {
+    const reminder = this.needsNextDate(c);
+    const elapsed = !!c.nextDate && c.nextDate < this.TODAY;
+    const wrap = { width: '138px', flex: '0 0 auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: '16px 14px', background: reminder ? 'var(--pink-fill,#fbece7)' : '#16243f', color: reminder ? 'var(--red-ink,#9a3320)' : '#fff', gap: '7px' };
+    const labelCol = reminder ? '#c08a6f' : '#c7a25f';
+    const noStyle = { fontFamily: "'Source Serif 4', serif", fontWeight: 700, fontSize: '17px', lineHeight: 1.18, wordBreak: 'break-word' };
+    if (reminder) {
+      return { tileStyle: wrap,
+        tileNoLabel: 'CASE NO.', tileNoLabelStyle: { fontSize: '9.5px', fontWeight: 700, letterSpacing: '1px', color: labelCol },
+        tileNo: c.no, tileNoStyle: noStyle,
+        tileDate: elapsed ? ('Date passed \u00b7 ' + this.fmtShort(c.nextDate)) : 'No next date', tileDateStyle: { fontSize: '11px', fontWeight: 700, letterSpacing: '0.4px', color: 'var(--red-ink,#9a3320)', background: 'var(--surface,#fff)', border: '1px solid var(--pink-line,#f1cdc2)', padding: '2px 8px', borderRadius: '999px', whiteSpace: 'nowrap' },
+      };
+    }
+    const n = this.daysFrom(c.nextDate);
+    const isToday = n === 0;
+    return {
+      tileStyle: wrap,
+      tileNoLabel: 'CASE NO.', tileNoLabelStyle: { fontSize: '9.5px', fontWeight: 700, letterSpacing: '1px', color: labelCol },
+      tileNo: c.no, tileNoStyle: noStyle,
+      tileDate: (isToday ? 'Today · ' : '') + this.fmtMed(c.nextDate), tileDateStyle: { fontSize: '10.5px', fontWeight: 700, color: '#c7a25f', background: 'rgba(199,162,95,0.16)', padding: '3px 9px', borderRadius: '999px', whiteSpace: 'nowrap' },
+    };
+  }
+
+  flagStyle(active, gold) {
+    const c = gold ? '#8a6d3f' : 'var(--ink2,#42536f)';
+    const bg = gold ? 'var(--gold-fill,#f6efe3)' : 'var(--blue-fill,#eef1f6)';
+    const bd = gold ? 'var(--gold-line,#e3cfa6)' : 'var(--blue-line,#d6deeb)';
+    return active
+      ? { fontSize: '11px', fontWeight: 700, color: c, background: bg, border: '1px solid ' + bd, padding: '6px 11px', borderRadius: '8px', whiteSpace: 'nowrap' }
+      : { fontSize: '11px', fontWeight: 600, color: 'var(--muted2,#8a93a3)', background: 'transparent', border: '1px solid var(--line,#e2ddd4)', padding: '6px 11px', borderRadius: '8px', whiteSpace: 'nowrap' };
+  }
+  toggleFlag(id, field) {
+    this.setState(s => {
+      const cases = s.cases.map(c => c.id === id ? { ...c, [field]: !c[field] } : c);
+      this.persist(cases);
+      return { cases };
+    });
+  }
+  contactDefaults(c) {
+    const side = (c.plaintiff && c.plaintiff.mine) ? c.plaintiff : ((c.defendant && c.defendant.mine) ? c.defendant : (c.plaintiff || c.defendant || null));
+    const firstPhone = (arr) => (arr && arr.find ? (arr.find(x => (x || '').trim()) || '') : '');
+    return {
+      receivedDate: c.receivedDate != null ? c.receivedDate : '',
+      commName: c.commName != null ? c.commName : ((side && side.commName) || ''),
+      commPhone: c.commPhone != null ? c.commPhone : firstPhone(side && side.commPhones),
+      careName: c.careName != null ? c.careName : ((side && side.careName) || ''),
+      carePhone: c.carePhone != null ? c.carePhone : firstPhone(side && side.carePhones),
+      oppForDef: c.oppForDef != null ? c.oppForDef : ((c.oppLawyers && c.oppLawyers[0] && c.oppLawyers[0].forDefNos) || ''),
+    };
+  }
+
+  caseToVals(c) {
+    const expanded = !!this.state.expanded[c.id];
+    const cd = this.contactDefaults(c);
+    const needsReminder = this.needsNextDate(c);
+    const mine = c.partiesA.filter(p => p.mine).map(p => ({ ...p, side: 'Plaintiff' }))
+      .concat(c.partiesB.filter(p => p.mine).map(p => ({ ...p, side: 'Defendant' })));
+    const iAmPlaintiff = c.partiesA.some(p => p.mine);
+    const oppArr = iAmPlaintiff ? c.partiesB : c.partiesA;
+    const oppSideName = iAmPlaintiff ? 'Defendant' : 'Plaintiff';
+    const oppNums = oppArr.map(p => (p.tag || '').replace(/\D/g, '')).filter(Boolean);
+    const oppRepLabel = oppNums.length ? oppSideName + (oppNums.length > 1 ? 's ' : ' ') + this.joinNums(oppNums) : '';
+    const tiles = this.tileStyles(c);
+    const reminderRing = needsReminder ? '1px solid var(--pink-line,#f1cdc2)' : '1px solid var(--line,#ece9e3)';
+    return {
+      ...tiles,
+      no: c.no, type: c.type, stage: c.stage, courtShort: c.courtShort,
+      partyA: this.partyLead(c.partiesA), partyB: this.partyLead(c.partiesB),
+      hasCourtOrder: !!c.courtOrder, courtOrder: c.courtOrder,
+      hasTodayTodo: !!c.todayTodo, todayTodo: c.todayTodo,
+      needsReminder,
+      hasNextDate: !!c.nextDate && c.nextDate >= this.TODAY, nextShort: this.fmtMed(c.nextDate),
+      reminderLine: this.reminderLineText(c),
+      clientList: mine.map(p => ({ side: p.side, sideLabel: p.side + ' ' + ((p.tag || '').replace(/\D/g, '') || ''), sideStyle: this.sideChip(p.side), name: p.name, phone: p.phone || '\u2014', telHref: 'tel:' + (p.phone || '').replace(/[^0-9+]/g, '') })),
+      prevLabel: c.prevDate ? this.fmtMed(c.prevDate) : 'Not on record',
+      nextDateLabel: c.nextDate ? this.fmtMed(c.nextDate) : 'Not set',
+      blockStyle: { background: 'var(--surface,#fff)', border: reminderRing, borderRadius: '14px', overflow: 'hidden', display: 'flex', boxShadow: '0 1px 3px rgba(22,36,63,0.05)' },
+      isExpanded: expanded,
+      chevStyle: { width: '34px', height: '34px', borderRadius: '9px', border: '1px solid var(--line,#e2ddd4)', color: expanded ? 'var(--ink,#16243f)' : 'var(--muted,#5b6678)', background: expanded ? 'var(--fill,#f3f5f9)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+      chevIconStyle: { transition: 'transform .18s', transform: expanded ? 'rotate(180deg)' : 'none' },
+      nextDate: c.nextDate || '', courtOrderVal: c.courtOrder || '', nextTodo: c.nextTodo || '', fee: c.fee || '', notes: c.notes || '',
+      oppName: c.oppName || '', oppPhone: c.oppPhone || '',
+      hasOppRep: oppRepLabel.length > 0, oppRepLabel,
+      receivedDateVal: cd.receivedDate, commName: cd.commName, commPhone: cd.commPhone, careName: cd.careName, carePhone: cd.carePhone, oppForDef: cd.oppForDef,
+      commNameDisp: cd.commName || '\u2014', commPhoneDisp: cd.commPhone || '\u2014', careNameDisp: cd.careName || '\u2014', carePhoneDisp: cd.carePhone || '\u2014',
+      sunaniStyle: this.flagStyle(!!c.sunani, true), todbirStyle: this.flagStyle(!!c.todbir, false),
+      waValue: this.state.waText[c.id] ?? this.waMessage(c, this.state.waLang),
+      waEnStyle: this.waSegStyle(this.state.waLang === 'en'), waBnStyle: this.waSegStyle(this.state.waLang === 'bn'),
+      waHref: 'https://wa.me/' + this.waPhone(c) + '?text=' + encodeURIComponent(this.state.waText[c.id] ?? this.waMessage(c, this.state.waLang)),
+      onWaEn: () => this.setWaLang('en'), onWaBn: () => this.setWaLang('bn'),
+      onWaText: (e) => this.onWaText(c.id, e.target.value), onCopyWa: () => this.copyWa(c.id),
+      files: c.files.map((f, idx) => ({
+        name: f.name, typeLabel: f.typeLabel || this.extType(f.name), typeStyle: this.fileTypeStyle(f.typeLabel || this.extType(f.name)),
+        hasUrl: !!f.url, sample: !f.url,
+        onOpen: () => this.openFile(f.url), onPrint: () => this.printFile(f), onRemove: () => this.removeFile(c.id, idx),
+      })),
+      noFiles: c.files.length === 0,
+      onExpand: () => this.openCase(c.id),
+      onToggleExpand: () => this.toggleExpand(c.id),
+      onNextDate: (e) => this.updateField(c.id, 'nextDate', e.target.value),
+      onCourtOrder: (e) => this.updateField(c.id, 'courtOrder', e.target.value),
+      onNextTodo: (e) => this.updateField(c.id, 'nextTodo', e.target.value),
+      todayTodoVal: c.todayTodo || '', onTodayTodo: (e) => this.updateField(c.id, 'todayTodo', e.target.value),
+      fwdDateVal: (this.state.fwd || {})[c.id] || '', onFwdDate: (e) => this.setFwd(c.id, e.target.value), onForward: () => this.forwardCase(c.id),
+      onFee: (e) => this.updateField(c.id, 'fee', e.target.value),
+      onNotes: (e) => this.updateField(c.id, 'notes', e.target.value),
+      onOppName: (e) => this.updateField(c.id, 'oppName', e.target.value),
+      onOppPhone: (e) => this.updateField(c.id, 'oppPhone', e.target.value),
+      onReceivedDate: (e) => this.updateField(c.id, 'receivedDate', e.target.value),
+      onCommName: (e) => this.updateField(c.id, 'commName', e.target.value),
+      onCommPhone: (e) => this.updateField(c.id, 'commPhone', e.target.value),
+      onCareName: (e) => this.updateField(c.id, 'careName', e.target.value),
+      onCarePhone: (e) => this.updateField(c.id, 'carePhone', e.target.value),
+      onOppForDef: (e) => this.updateField(c.id, 'oppForDef', e.target.value),
+      onSunani: () => this.toggleFlag(c.id, 'sunani'), onTodbir: () => this.toggleFlag(c.id, 'todbir'),
+      onUpload: (e) => { this.addFiles(c.id, e.target.files); e.target.value = ''; },
+      onSave: () => this.onSave(c.id), onCancel: () => this.collapse(c.id),
+      onArm: () => this.arm(c.id), onDisarm: this.disarm, onConfirmDelete: () => this.confirmDelete(c.id),
+      armed: this.state.armId === c.id, notArmed: this.state.armId !== c.id,
+    };
+  }
+
+  renderVals() {
+    const clients = this.clients();
+    const hmap = this.hearingMap();
+    const sel = this.state.selectedDate;
+    const q = this.state.search.trim().toLowerCase();
+
+    const noDate = this.state.showNoDateOnly;
+    let list;
+    if (noDate) list = this.state.cases.filter(c => this.needsNextDate(c));
+    else list = sel ? this.state.cases.filter(c => (hmap[sel] || []).includes(c.id)) : this.state.cases.slice();
+    if (q) list = list.filter(c => {
+      const parties = c.partiesA.concat(c.partiesB).map(p => p.name).join(' ');
+      return (c.no + ' ' + parties + ' ' + c.court + ' ' + c.summary + ' ' + c.type).toLowerCase().includes(q);
+    });
+    list.sort((a, b) => {
+      if (!a.nextDate && b.nextDate) return -1;
+      if (a.nextDate && !b.nextDate) return 1;
+      return a.nextDate < b.nextDate ? -1 : a.nextDate > b.nextDate ? 1 : 0;
+    });
+
+    const total = list.length;
+    let contextTitle = 'All matters', contextSub = `${total} active ${total === 1 ? 'matter' : 'matters'} in the diary`;
+    if (noDate) {
+      contextTitle = 'Matters needing a next date';
+      contextSub = total === 0 ? 'Every matter has a next date \u2014 nothing pending' : `${total} ${total === 1 ? 'matter has' : 'matters have'} no next date set`;
+    } else if (sel) {
+      contextTitle = 'Cause list \u00b7 ' + this.fmtLong(sel);
+      contextSub = total === 0 ? 'No hearings listed for this date' : `${total} ${total === 1 ? 'matter' : 'matters'} listed for hearing`;
+    }
+
+    // records (forwarded copies) that sit on the selected date
+    const records = sel ? this.state.cases.flatMap(c => (c.appearances || [])
+      .filter(a => a.date === sel)
+      .map(a => ({
+        no: c.no, type: c.type,
+        partyA: this.partyLead(c.partiesA), partyB: this.partyLead(c.partiesB),
+        action: a.action || a.courtOrder || 'Date taken; adjourned.',
+        fwdLabel: a.nextDate ? this.fmtMed(a.nextDate) : '\u2014',
+        onOpen: () => this.openCase(c.id),
+      }))) : [];
+
+    // personal to-dos for the focused day
+    const todoDay = this.state.selectedDate || this.TODAY;
+    const todoItems = (this.state.personalTodos[todoDay] || []).map(t => ({
+      id: t.id, text: t.text, done: t.done,
+      textStyle: { flex: 1, minWidth: 0, padding: '7px 9px', border: '1px solid var(--line,#ece9e3)', borderRadius: '8px', background: 'var(--surface,#fff)', fontSize: '13.5px', color: t.done ? 'var(--faint,#aeb4c0)' : 'var(--ink,#16243f)', outline: 'none', textDecoration: t.done ? 'line-through' : 'none' },
+      boxStyle: { width: '20px', height: '20px', borderRadius: '6px', border: t.done ? '1px solid #2f7a5f' : '1px solid var(--line,#cdd3dd)', background: t.done ? '#2f7a5f' : 'var(--surface,#fff)', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto', color: '#fff' },
+      onToggle: () => this.toggleTodo(t.id),
+      onText: (e) => this.editTodo(t.id, e.target.value),
+      onDelete: () => this.deleteTodo(t.id),
+    }));
+
+    const todayCount = (hmap[this.TODAY] || []).length;
+    let weekCount = 0;
+    Object.keys(hmap).forEach(k => { const n = this.daysFrom(k); if (n >= 0 && n <= 6) weekCount += hmap[k].length; });
+
+    const reminderCount = this.state.cases.filter(c => this.needsNextDate(c)).length;
+
+    const vals = {
+      monthLabel: this.MONTHS_F[this.state.calMonth] + ' ' + this.state.calYear,
+      calMonthStr: String(this.state.calMonth), calYearStr: String(this.state.calYear),
+      monthOptions: this.MONTHS_F.map((mm, i) => ({ value: String(i), label: mm })),
+      yearOptions: this.yearOptions(), onMonthSelect: this.onMonthSelect, onYearSelect: this.onYearSelect,
+      bengaliDate: this.bengaliLabel(this.state.selectedDate || this.TODAY),
+      weeks: this.buildCalendar(hmap), onPrevMonth: this.onPrevMonth, onNextMonth: this.onNextMonth, onToday: this.onToday,
+      todayCount, weekCount, activeCount: this.state.cases.length, todayDateLabel: this.fmtLong(this.TODAY),
+      showReminderStat: reminderCount > 0, reminderStatText: `${reminderCount} matter${reminderCount > 1 ? 's' : ''} need a next date \u2014 reminders every 2 days`,
+      reminderCount, reminderLabelText: `matter${reminderCount > 1 ? 's' : ''} need a next date \u00b7 reminders every 2 days`, noReminders: reminderCount === 0,
+      noDateActive: this.state.showNoDateOnly, onToggleNoDate: this.toggleNoDateOnly,
+      showReminderBanner: reminderCount > 0 && !sel, reminderBannerText: `${reminderCount} matter${reminderCount > 1 ? 's' : ''} have no next date set.`,
+      reminderBtnLabel: this.state.showNoDateOnly ? 'Show all matters' : `View ${reminderCount} matter${reminderCount > 1 ? 's' : ''}`,
+      cases: list.map(c => this.caseToVals(c)),
+      records, showRecords: !!sel && records.length > 0,
+      recordsHeading: `RECORDS ON THIS DATE (${records.length})`,
+      todoItems, showTodos: true,
+      todoDateLabel: this.state.selectedDate ? this.fmtLong(this.state.selectedDate) : 'Today \u00b7 ' + this.fmtLong(this.TODAY),
+      todoDraft: this.state.todoDraft, onTodoDraft: this.setTodoDraft, onAddTodo: this.addTodo,
+      onTodoKey: (e) => { if (e.key === 'Enter') this.addTodo(); },
+      noTodos: todoItems.length === 0,
+      noResults: total === 0 && !!q,
+      contextTitle, contextSub, search: this.state.search, onSearch: this.onSearch,
+      showClear: !!sel, onClearDate: this.onClearDate,
+      popupOpen: !!this.state.openId,
+      onCloseCase: this.onCloseCase, onOverlayClose: this.onOverlayClose, stopProp: this.stopProp,
+      onTabHistory: () => this.setState({ tab: 'history' }), onTabClient: () => this.setState({ tab: 'client' }),
+      tabHistoryStyle: this.tabStyle(this.state.tab === 'history'), tabClientStyle: this.tabStyle(this.state.tab === 'client'),
+      showHistory: this.state.tab === 'history', showClient: this.state.tab === 'client',
+      toastOpen: !!this.state.toast, toastText: this.state.toast || '',
+      dark: this.state.dark, lightMode: !this.state.dark, onToggleTheme: this.toggleTheme,
+      diaryTitle: ((this.state.user.name || '').trim().split(/\s+/)[0] || 'My') + '\u2019s Diary',
+      userInitials: ((this.state.user.name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase()) || 'LD',
+      userPhoto: this.state.user.photo || '', hasUserPhoto: !!this.state.user.photo, noUserPhoto: !this.state.user.photo,
+      avatarPhotoStyle: { width: '100%', height: '100%', backgroundImage: this.state.user.photo ? ('url(' + this.state.user.photo + ')') : 'none', backgroundSize: 'cover', backgroundPosition: 'center' },
+    };
+
+    if (this.state.openId) {
+      const oc = this.state.cases.find(c => c.id === this.state.openId);
+      if (oc) {
+        const fallbackMine = oc.partiesA.concat(oc.partiesB).find(p => p.mine);
+        const cl = clients[oc.clientKey] || oc.client || { name: fallbackMine ? fallbackMine.name : oc.no, role: 'Client', phone: (fallbackMine && fallbackMine.phone) || '\u2014', address: '\u2014', since: '\u2014' };
+        vals.ocNo = oc.no; vals.ocType = oc.type; vals.ocClient = cl.name; vals.ocRole = cl.role;
+        vals.ocCourt = oc.court; vals.ocCourtShort = oc.courtShort; vals.ocJudge = oc.judge; vals.ocStage = oc.stage;
+        vals.ocPriorityLabel = this.priLabel(oc.priority); vals.ocPriorityStyle = this.priTagStyle(oc.priority);
+        vals.ocNextLong = this.fmtLong(oc.nextDate); vals.ocDaysLabel = oc.nextDate ? this.daysLabel(oc.nextDate) : 'Not set';
+        vals.ocHasTodo = !!oc.nextTodo; vals.ocNextTodo = oc.nextTodo;
+        const pays = (oc.payments || []).slice().sort((a, b) => a.date < b.date ? -1 : 1);
+        const honor = pays.filter(p => p.type === 'honorarium').reduce((a, b) => a + b.amount, 0);
+        const taskF = pays.filter(p => p.type === 'task').reduce((a, b) => a + b.amount, 0);
+        const totPaid = honor + taskF;
+        const fmtBdt = (n) => '\u09F3' + n.toLocaleString('en-IN');
+        vals.ocHasPayments = pays.length > 0;
+        vals.ocPayTotal = fmtBdt(totPaid); vals.ocPayHonor = fmtBdt(honor); vals.ocPayTask = fmtBdt(taskF);
+        vals.ocPayHonorBar = { width: (totPaid ? (honor / totPaid * 100) : 0) + '%', background: '#4a73c0', transition: 'width .3s' };
+        vals.ocPayTaskBar = { width: (totPaid ? (taskF / totPaid * 100) : 0) + '%', background: '#c79a45', transition: 'width .3s' };
+        vals.paymentItems = pays.map(p => ({ label: p.label, date: this.fmtMed(p.date), amount: fmtBdt(p.amount), dotStyle: { width: '10px', height: '10px', borderRadius: '3px', flex: '0 0 auto', background: p.type === 'honorarium' ? '#4a73c0' : '#c79a45' } }));
+        const dn = this.daysFrom(oc.nextDate);
+        vals.ocDaysBadgeStyle = { flex: '0 0 auto', padding: '6px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", background: dn === 0 ? '#c7a25f' : 'rgba(255,255,255,0.12)', color: dn === 0 ? '#16243f' : '#c7d4ea' };
+        vals.historyItems = oc.history.slice().reverse().map((h, i, arr) => ({
+          date: this.fmtMed(h.date), title: h.title, note: h.note,
+          dotStyle: { width: '11px', height: '11px', borderRadius: '50%', background: this.kindColor(h.kind), border: '2px solid var(--bg,#fbfaf8)', boxShadow: '0 0 0 1px ' + this.kindColor(h.kind), flex: '0 0 auto', marginTop: '3px' },
+          lineStyle: { width: '2px', flex: 1, background: i === arr.length - 1 ? 'transparent' : 'var(--line,#e6e2da)', marginTop: '4px' },
+        }));
+        const cInitials = cl.name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+        vals.clientName = cl.name; vals.clientRole = cl.role; vals.clientPhone = cl.phone; vals.clientAddress = cl.address; vals.clientSince = cl.since; vals.clientInitials = cInitials;
+        const ccs = oc.clientKey ? this.state.cases.filter(c => c.clientKey === oc.clientKey) : [oc];
+        vals.clientCasesHeading = `MATTERS FOR THIS CLIENT (${ccs.length})`;
+        vals.clientCaseList = ccs.map(c => {
+          const isCur = c.id === oc.id;
+          return {
+            no: c.no, type: c.type, summary: c.summary, stage: c.stage, nextLabel: this.fmtShort(c.nextDate),
+            stageDotStyle: { width: '7px', height: '7px', borderRadius: '50%', flex: '0 0 auto', background: this.stageColor(c.stageType) },
+            currentLabel: isCur ? 'Viewing' : '', currentStyle: isCur
+              ? { fontSize: '9.5px', fontWeight: 700, letterSpacing: '0.4px', textTransform: 'uppercase', color: '#8a6d3f', background: 'var(--gold-fill,#f6efe3)', padding: '2px 6px', borderRadius: '5px' }
+              : { display: 'none' },
+            blockStyle: { background: isCur ? 'var(--gold-fill,#fbf7ef)' : 'var(--surface,#fff)', border: isCur ? '1px solid var(--gold-line,#e3cfa6)' : '1px solid var(--line,#ece9e3)', borderRadius: '12px', padding: '13px 15px' },
+            onExpand: () => this.openCase(c.id),
+          };
+        });
+      }
+    }
+
+    return vals;
+  }
+}
+</script>
+</body>
+</html>

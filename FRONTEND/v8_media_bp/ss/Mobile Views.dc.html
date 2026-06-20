@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  .mv-bezel { position: relative; width: 408px; height: 840px; background: #0d0f14; border-radius: 44px; padding: 13px; box-shadow: 0 24px 60px rgba(10,16,28,0.4), 0 0 0 2px #2a2e38 inset; flex: 0 0 auto; }
+  .mv-screen { position: relative; width: 100%; height: 100%; border-radius: 32px; overflow: hidden; background: #fff; }
+  .mv-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 132px; height: 26px; background: #0d0f14; border-radius: 0 0 16px 16px; z-index: 5; }
+  .mv-screen iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+</style>
+</helmet>
+
+<div style="width:max-content;min-width:100%;min-height:100vh;box-sizing:border-box;padding:48px;background:#e7e5df;font-family:'Hanken Grotesk',system-ui,sans-serif">
+
+  <div style="max-width:780px;margin-bottom:30px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#8a6d3f">LAWYERS DIARY · MOBILE PASS</div>
+    <h1 style="margin:6px 0 8px;font-family:'Source Serif 4',serif;font-weight:700;font-size:30px;color:#16243f;line-height:1.1">Mobile views — the real app at phone width</h1>
+    <div style="font-size:14px;color:#5b6678;line-height:1.55">These bezels load the <b>actual screens</b> (not a mockup) at 390&nbsp;px, so every blue case-no tile, the Sunani / Todbir / Details buttons, the “DO” box, the awaiting-next-date blocks, personal to-dos and the full expanded edit pane are exactly as on desktop — just reflowed. New for mobile: a <b>bottom nav</b> and a <b>slide-up calendar sheet</b>. Tap inside a frame to interact.</div>
+  </div>
+
+  <div style="display:flex;align-items:flex-start;gap:40px">
+
+    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;color:#42536f;letter-spacing:0.3px">1 · Day view <span style="font-weight:500;color:#8a93a3">— diary home + bottom nav</span></div>
+      <div class="mv-bezel"><div class="mv-screen"><div class="mv-notch"></div><iframe src="Lawyers Diary.dc.html" title="Day view"></iframe></div></div>
+    </div>
+
+    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;color:#42536f;letter-spacing:0.3px">2 · Calendar <span style="font-weight:500;color:#8a93a3">— slide-up sheet (month + year)</span></div>
+      <div class="mv-bezel"><div class="mv-screen"><div class="mv-notch"></div><iframe src="Lawyers Diary.dc.html?sheet=cal" title="Calendar sheet"></iframe></div></div>
+    </div>
+
+    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;color:#42536f;letter-spacing:0.3px">3 · Case — expanded <span style="font-weight:500;color:#8a93a3">— full edit pane</span></div>
+      <div class="mv-bezel"><div class="mv-screen"><div class="mv-notch"></div><iframe src="Lawyers Diary.dc.html?expand=c1" title="Case expanded"></iframe></div></div>
+    </div>
+
+    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;color:#42536f;letter-spacing:0.3px">4 · Pending dates <span style="font-weight:500;color:#8a93a3">— awaiting a next date</span></div>
+      <div class="mv-bezel"><div class="mv-screen"><div class="mv-notch"></div><iframe src="Pending Dates.dc.html" title="Pending dates"></iframe></div></div>
+    </div>
+
+    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;color:#42536f;letter-spacing:0.3px">5 · All cases <span style="font-weight:500;color:#8a93a3">— stacked cards</span></div>
+      <div class="mv-bezel"><div class="mv-screen"><div class="mv-notch"></div><iframe src="All Cases.dc.html" title="All cases"></iframe></div></div>
+    </div>
+
+    <div style="flex:0 0 auto;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;font-weight:700;color:#42536f;letter-spacing:0.3px">6 · New case <span style="font-weight:500;color:#8a93a3">— full intake form</span></div>
+      <div class="mv-bezel"><div class="mv-screen"><div class="mv-notch"></div><iframe src="Create Case.dc.html" title="New case"></iframe></div></div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

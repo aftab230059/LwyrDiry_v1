@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="scripts/support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  button { font: inherit; color: inherit; border: none; background: none; cursor: pointer; }
+  input { font: inherit; }
+  @keyframes ldToast { from { opacity: 0; transform: translate(-50%, 14px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  [data-theme="dark"]{ color-scheme:dark;
+    --bg:#0e1116; --surface:#171c25; --brand:#1d3056; --brand-hover:#274072;
+    --ink:#eef2fa; --ink2:#c8d1e0; --muted:#97a3ba; --muted2:#808da4; --faint:#67738a;
+    --line:#262e3b; --fill:#1d2530;
+    --blue-fill:#16243d; --blue-line:#283750; --blue-ink:#93b6f0;
+    --gold-fill:#272113; --gold-line:#4a3f21;
+    --green-fill:#12231a; --green-line:#234134; --green-ink:#7bd6a0;
+    --pink-fill:#2c1c19; --pink-line:#542c24; --red-ink:#f3ad95; }
+  [data-theme="dark"] ::placeholder{ color:#717d90; opacity:1; }
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--brand,#16243f);font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink,#16243f);-webkit-font-smoothing:antialiased">
+
+  <!-- left brand panel -->
+  <div style="flex:1;min-width:0;background:var(--brand,#16243f);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:48px 52px;position:relative;overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(120% 80% at 0% 0%, rgba(199,162,95,0.12), transparent 55%);pointer-events:none"></div>
+    <div style="display:flex;align-items:center;gap:13px;position:relative">
+      <div style="width:46px;height:46px;border-radius:12px;background:rgba(199,162,95,0.14);border:1px solid rgba(199,162,95,0.4);display:flex;align-items:center;justify-content:center">
+        <span style="font-family:'Source Serif 4',serif;font-weight:700;font-size:19px;color:#c7a25f;letter-spacing:0.5px">LD</span>
+      </div>
+      <div>
+        <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:19px">Lawyers Diary</div>
+        <div style="font-size:11.5px;color:#8fa0bf;font-weight:500;letter-spacing:0.3px;margin-top:1px">ADVOCATE'S CAUSE DIARY</div>
+      </div>
+    </div>
+
+    <div style="position:relative;max-width:440px">
+      <div style="font-family:'Source Serif 4',serif;font-weight:600;font-size:32px;line-height:1.25">Your own diary, in your own name.</div>
+      <p style="font-size:15px;color:#a7b6d2;line-height:1.65;margin:18px 0 0">Create your advocate profile once. Each lawyer gets a private cause diary — your name and photo on top, your cases inside, synced to your phone.</p>
+    </div>
+
+    <div style="position:relative;display:flex;gap:26px;font-size:12.5px;color:#8fa0bf;font-weight:500">
+      <span>Private per advocate</span>
+      <span>Your photo &amp; name</span>
+      <span>Free to start</span>
+    </div>
+  </div>
+
+  <!-- right form panel -->
+  <div style="flex:0 0 560px;width:560px;background:var(--bg,#fbfaf8);display:flex;align-items:center;justify-content:center;padding:40px 30px;overflow-y:auto">
+    <div style="width:100%;max-width:400px">
+
+      <div style="margin-bottom:24px">
+        <h1 style="margin:0 0 6px;font-family:'Source Serif 4',serif;font-weight:600;font-size:26px">Create your account</h1>
+        <p style="margin:0;font-size:14px;color:var(--muted2,#8a93a3);line-height:1.5">A minute to set up your private cause diary.</p>
+      </div>
+
+      <!-- profile photo -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <div style="width:68px;height:68px;border-radius:18px;background:var(--brand,#16243f);display:flex;align-items:center;justify-content:center;flex:0 0 auto;overflow:hidden">
+          <sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}"><img src="{{ photo }}" alt="" style="width:100%;height:100%;object-fit:cover" /></sc-if>
+          <sc-if value="{{ noPhoto }}" hint-placeholder-val="{{ true }}"><span style="font-family:'Source Serif 4',serif;font-weight:700;font-size:24px;color:#c7a25f">{{ initials }}</span></sc-if>
+        </div>
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--ink2,#3c485e)">Profile picture</div>
+          <div style="font-size:12px;color:var(--muted2,#8a93a3);margin-top:1px">Shown on top of your diary.</div>
+          <label style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;font-weight:600;color:var(--ink,#16243f);background:var(--surface,#fff);border:1px solid var(--line,#e2ddd4);padding:7px 13px;border-radius:9px;cursor:pointer" style-hover="border-color:var(--gold-line,#c7a25f)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            {{ photoBtnLabel }}
+            <input type="file" accept="image/*" onChange="{{ onPhoto }}" style="display:none" />
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:15px">
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:13px;font-weight:600;color:var(--ink2,#3c485e)">Full name</span>
+          <input value="{{ name }}" onInput="{{ onName }}" placeholder="Adv. Shaon Rahman" style="{{ inputStyle }}" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:13px;font-weight:600;color:var(--ink2,#3c485e)">Mobile number</span>
+          <input value="{{ phone }}" onInput="{{ onPhone }}" inputMode="tel" placeholder="+880 1XXX-XXXXXX" style="{{ inputStyle }}" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:13px;font-weight:600;color:var(--ink2,#3c485e)">Email address</span>
+          <input value="{{ email }}" onInput="{{ onEmail }}" type="email" placeholder="you@chamber.com" style="{{ inputStyle }}" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:13px;font-weight:600;color:var(--ink2,#3c485e)">Password</span>
+          <input value="{{ password }}" onInput="{{ onPassword }}" type="password" placeholder="Create a password" style="{{ inputStyle }}" />
+        </label>
+
+        <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:var(--red-ink,#9a3320);font-weight:600;display:flex;align-items:center;gap:7px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12" y2="16"></line></svg>
+            {{ errorText }}
+          </div>
+        </sc-if>
+
+        <button onClick="{{ onCreate }}" style="margin-top:4px;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 0;background:var(--brand,#16243f);color:#fff;border-radius:11px;font-size:14.5px;font-weight:600" style-hover="background:var(--brand-hover,#0f1a30)">
+          Create account &amp; open my diary
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </div>
+
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line,#ece9e3);text-align:center;font-size:13px;color:var(--muted2,#8a93a3)">
+        Already have an account? <a href="login.dc.html" style="color:#8a6d3f;font-weight:600;text-decoration:none">Sign in</a>
+      </div>
+
+    </div>
+  </div>
+
+  <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:26px;left:50%;z-index:60;transform:translateX(-50%);display:flex;align-items:center;gap:9px;padding:11px 18px;background:var(--brand,#16243f);color:#fff;border-radius:11px;box-shadow:0 16px 40px -12px rgba(12,18,30,0.5);font-size:13px;font-weight:600;animation:ldToast 0.22s ease">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c7a25f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      {{ toastText }}
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { name: '', phone: '', email: '', password: '', photo: '', error: '', toast: null };
+  }
+  componentDidMount() { try { document.documentElement.setAttribute('data-theme', window.localStorage.getItem('ld_theme') === 'dark' ? 'dark' : 'light'); } catch (e) {} }
+  componentWillUnmount() { clearTimeout(this._toastT); clearTimeout(this._navT); }
+  showToast(msg) { clearTimeout(this._toastT); this.setState({ toast: msg }); this._toastT = setTimeout(() => this.setState({ toast: null }), 2200); }
+
+  onName = (e) => this.setState({ name: e.target.value, error: '' });
+  onPhone = (e) => this.setState({ phone: e.target.value, error: '' });
+  onEmail = (e) => this.setState({ email: e.target.value, error: '' });
+  onPassword = (e) => this.setState({ password: e.target.value, error: '' });
+  onPhoto = (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => this.setState({ photo: reader.result });
+    reader.readAsDataURL(f);
+    e.target.value = '';
+  };
+  validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((v || '').trim()); }
+  initials() {
+    const n = (this.state.name || '').replace(/^(adv\.?|advocate)\s+/i, '').trim();
+    const parts = n.split(/\s+/).filter(Boolean);
+    return (parts.slice(0, 2).map(w => w[0]).join('').toUpperCase()) || 'LD';
+  }
+
+  create = () => {
+    if (!this.state.name.trim()) { this.setState({ error: 'Please enter your name.' }); return; }
+    if (!this.validEmail(this.state.email)) { this.setState({ error: 'Please enter a valid email address.' }); return; }
+    if ((this.state.password || '').length < 4) { this.setState({ error: 'Choose a password of at least 4 characters.' }); return; }
+    const user = { name: this.state.name.trim(), phone: this.state.phone.trim(), email: this.state.email.trim(), photo: this.state.photo || '' };
+    try { window.localStorage.setItem('ld_user', JSON.stringify(user)); } catch (e) {}
+    this.showToast('Account created \u2014 opening your diary');
+    clearTimeout(this._navT);
+    this._navT = setTimeout(() => { window.location.href = 'Lawyers Diary.dc.html'; }, 950);
+  };
+
+  renderVals() {
+    const inputStyle = { width: '100%', padding: '13px 14px', border: '1px solid var(--line,#e2ddd4)', borderRadius: '11px', background: 'var(--surface,#fff)', fontSize: '14.5px', color: 'var(--ink,#16243f)', outline: 'none' };
+    return {
+      name: this.state.name, onName: this.onName,
+      phone: this.state.phone, onPhone: this.onPhone,
+      email: this.state.email, onEmail: this.onEmail,
+      password: this.state.password, onPassword: this.onPassword,
+      photo: this.state.photo, hasPhoto: !!this.state.photo, noPhoto: !this.state.photo,
+      onPhoto: this.onPhoto, photoBtnLabel: this.state.photo ? 'Change photo' : 'Upload photo',
+      initials: this.initials(), inputStyle,
+      hasError: !!this.state.error, errorText: this.state.error,
+      onCreate: this.create,
+      toastOpen: !!this.state.toast, toastText: this.state.toast || '',
+    };
+  }
+}
+</script>
+</body>
+</html>
