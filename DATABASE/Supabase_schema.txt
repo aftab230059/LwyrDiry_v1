@@ -1,0 +1,212 @@
+-- ============================================================
+-- LAWYERS DIARY · Supabase schema v1.1
+-- Paste this whole file into Supabase → SQL Editor → New query → Run.
+-- Safe to run once on a fresh project. uuid PKs, timestamptz timestamps,
+-- multi-tenant via advocate_id, Row-Level Security on every table.
+-- ============================================================
+
+
+-- ============================================================
+-- SECTION 1 · CORE TABLES (needed for the MVP)
+-- ============================================================
+
+-- The advocate's profile. id matches the Supabase Auth user id.
+create table advocates (
+  id           uuid primary key references auth.users(id) on delete cascade,
+  full_name    text,
+  email        text,
+  phone        text,
+  theme        text default 'light',
+  default_lang text default 'bn',
+  created_at   timestamptz default now(),
+  updated_at   timestamptz default now()
+);
+
+create table clients (
+  id          uuid primary key default gen_random_uuid(),
+  advocate_id uuid not null references auth.users(id) on delete cascade,
+  name        text not null,
+  phone       text,
+  address     text,
+  role        text,
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now()
+);
+
+create table cases (
+  id          uuid primary key default gen_random_uuid(),
+  advocate_id uuid not null references auth.users(id) on delete cascade,
+  client_id   uuid references clients(id) on delete set null,
+  case_no     text,
+  case_type   text,
+  court       text,
+  prev_date   date,
+  next_date   date,
+  comm_name   text,   -- communicating person
+  comm_phone  text,
+  care_name   text,   -- care-of person
+  care_phone  text,
+  created_at  timestamptz default now(),
+  updated_at  timestamptz default now()
+);
+
+create table case_parties (
+  id          uuid primary key default gen_random_uuid(),
+  advocate_id uuid not null references auth.users(id) on delete cascade,
+  case_id     uuid not null references cases(id) on delete cascade,
+  client_id   uuid references clients(id) on delete set null,
+  side        text,    -- e.g. petitioner / respondent
+  position    text,
+  name        text,
+  is_mine     boolean default false,
+  phone       text,
+  created_at  timestamptz default now()
+);
+
+create table hearings (
+  id           uuid primary key default gen_random_uuid(),
+  advocate_id  uuid not null references auth.users(id) on delete cascade,
+  case_id      uuid not null references cases(id) on delete cascade,
+  date         date not null,
+  kind         text,   -- e.g. sunani / todbir
+  title        text,
+  note         text,
+  forwarded_to date,
+  created_at   timestamptz default now()
+);
+
+create table reminders (
+  id          uuid primary key default gen_random_uuid(),
+  advocate_id uuid not null references auth.users(id) on delete cascade,
+  case_id     uuid references cases(id) on delete cascade,
+  on_date     date not null,
+  text        text,
+  done        boolean default false,
+  created_at  timestamptz default now()
+);
+
+
+-- ============================================================
+-- SECTION 2 · LATER TABLES (on your cut-list; create now, fill in later)
+-- ============================================================
+
+create table opposing_counsel (
+  id          uuid primary key default gen_random_uuid(),
+  advocate_id uuid not null references auth.users(id) on delete cascade,
+  case_id     uuid not null references cases(id) on delete cascade,
+  name        text,
+  phone       text,
+  represents  int[],
+  created_at  timestamptz default now()
+);
+
+create table payments (
+  id          uuid primary key default gen_random_uuid(),
+  advocate_id uuid not null references auth.users(id) on delete cascade,
+  case_id     uuid not null references cases(id) on delete cascade,
+  type        text,
+  label       text,
+  amount      numeric(12,2),
+  paid_on     date,
+  created_at  timestamptz default now()
+);
+
+create table documents (
+  id           uuid primary key default gen_random_uuid(),
+  advocate_id  uuid not null references auth.users(id) on delete cascade,
+  case_id      uuid references cases(id) on delete cascade,
+  file_name    text,
+  storage_path text,
+  mime         text,
+  size         bigint,
+  created_at   timestamptz default now()
+);
+
+create table notifications_log (
+  id          uuid primary key default gen_random_uuid(),
+  advocate_id uuid not null references auth.users(id) on delete cascade,
+  case_id     uuid references cases(id) on delete set null,
+  channel     text,   -- push / sms / in-app
+  kind        text,
+  sent_at     timestamptz default now()
+);
+
+
+-- ============================================================
+-- SECTION 3 · ROW-LEVEL SECURITY
+-- Each advocate can only see/edit their own rows.
+-- ============================================================
+
+alter table advocates        enable row level security;
+alter table clients          enable row level security;
+alter table cases            enable row level security;
+alter table case_parties     enable row level security;
+alter table hearings         enable row level security;
+alter table reminders        enable row level security;
+alter table opposing_counsel enable row level security;
+alter table payments         enable row level security;
+alter table documents        enable row level security;
+alter table notifications_log enable row level security;
+
+-- Profile: you can only touch your own row (id = your auth id)
+create policy "own profile" on advocates
+  for all using (auth.uid() = id) with check (auth.uid() = id);
+
+-- Everything else: you can only touch rows where advocate_id = your auth id
+create policy "own rows" on clients
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on cases
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on case_parties
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on hearings
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on reminders
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on opposing_counsel
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on payments
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on documents
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+create policy "own rows" on notifications_log
+  for all using (auth.uid() = advocate_id) with check (auth.uid() = advocate_id);
+
+
+-- ============================================================
+-- SECTION 4 · INDEXES (make the common lookups fast)
+-- ============================================================
+
+create index on clients          (advocate_id);
+create index on cases            (advocate_id);
+create index on cases            (client_id);
+create index on cases            (next_date);          -- calendar / "today's hearings"
+create index on case_parties     (case_id);
+create index on hearings         (case_id);
+create index on hearings         (date);
+create index on reminders        (advocate_id, on_date);
+create index on opposing_counsel (case_id);
+create index on payments         (case_id);
+create index on documents        (case_id);
+
+
+-- ============================================================
+-- SECTION 5 · AUTO-CREATE PROFILE ON SIGNUP
+-- When someone registers, automatically make their advocates row.
+-- ============================================================
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.advocates (id, email)
+  values (new.id, new.email);
+  return new;
+end;
+$$;
+
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
